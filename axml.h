@@ -1176,6 +1176,7 @@ typedef  struct {
   int           fcThreshold;
   boolean       sampleQuartetsWithoutReplacement;
   boolean       printIdenticalSequences;
+  int           stop_after_seconds;
 } analdef;
 
 
