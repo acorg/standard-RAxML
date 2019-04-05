@@ -1340,58 +1340,45 @@ void doBootstrap(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
 
 static void printMesquite(tree *tr, analdef *adef)
 {
-  if(adef->mesquite)
-    {
-      FILE
-	*f = myfopen(mesquiteTrees, "ab"),
-	*models = myfopen(mesquiteModel, "ab");
+    if(adef->mesquite) {
+        FILE *f = myfopen(mesquiteTrees, "ab"),
+                *models = myfopen(mesquiteModel, "ab");
 
+        Tree2String(tr->tree_string, tr, tr->start->back, TRUE, TRUE, FALSE, FALSE, TRUE, adef, SUMMARIZE_LH, FALSE, FALSE, FALSE, FALSE);
 
-      Tree2String(tr->tree_string, tr, tr->start->back, TRUE, TRUE, FALSE, FALSE, TRUE, adef, SUMMARIZE_LH, FALSE, FALSE, FALSE, FALSE);
+        fprintf(f, "%s", tr->tree_string);
+        fprintf(models, "%f\n", tr->likelihood);
 
-      fprintf(f, "%s", tr->tree_string);
+        //TODO extend whatever is printed here
+        //TODO decide if we just want to print the model params of the final
+        // optimal tree, probably makes most sense ...
 
-      fprintf(models, "%f\n", tr->likelihood);
+        fclose(f);
+        fclose(models);
 
-      //TODO extend whatever is printed here
-      //TODO decide if we just want to print the model params of the final
-      // optimal tree, probably makes most sense ...
-
-      fclose(f);
-      fclose(models);
-
-      //printf("print mesquite\n");
+        //printf("print mesquite\n");
     }
 }
 
 static void printMesquiteAllTrees(tree *tr, analdef *adef)
 {
-  if(adef->mesquite)
-    {
-      FILE
-	*f = myfopen(mesquiteMLTrees, "ab");
-
-      Tree2String(tr->tree_string, tr, tr->start->back, TRUE, TRUE, FALSE, FALSE, TRUE, adef, SUMMARIZE_LH, FALSE, FALSE, FALSE, FALSE);
-
-      fprintf(f, "%s", tr->tree_string);
-
-      fclose(f);
+    if(adef->mesquite) {
+        FILE *f = myfopen(mesquiteMLTrees, "ab");
+        Tree2String(tr->tree_string, tr, tr->start->back, TRUE, TRUE, FALSE, FALSE, TRUE, adef, SUMMARIZE_LH, FALSE, FALSE, FALSE, FALSE);
+        fprintf(f, "%s", tr->tree_string);
+        fclose(f);
     }
 }
 
 static void printMesquiteLog(analdef *adef, double l1, double l2, boolean justOneValue)
 {
-  if(adef->mesquite)
-    {
-      FILE
-	*f = myfopen(mesquiteMLLikes, "ab");
-
-      if(justOneValue)
-	fprintf(f, "%f\n", l1);
-      else
-	fprintf(f, "%f\t%f\n", l1, l2);
-
-      fclose(f);
+    if(adef->mesquite) {
+        FILE *f = myfopen(mesquiteMLLikes, "ab");
+        if(justOneValue)
+            fprintf(f, "%f\n", l1);
+        else
+            fprintf(f, "%f\t%f\n", l1, l2);
+        fclose(f);
     }
 }
 
@@ -1400,23 +1387,16 @@ static void printMesquiteLog(analdef *adef, double l1, double l2, boolean justOn
 void doInference(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
 {
 #ifdef _WAYNE_MPI
-    int
-            j,
-            bestProcess;
+    int j, bestProcess;
 #endif
 
     double loopTime;
     topolRELL_LIST *rl = (topolRELL_LIST *)NULL;
-    int
-            best = -1,
-            newBest = -1;
-    double
-            bestLH = unlikely;
+    int best = -1, newBest = -1;
+    double bestLH = unlikely;
     char bestTreeFileName[1024];
-    double overallTime;
 
-    double
-            *unOptLikes = (double*)rax_malloc(sizeof(double) * (size_t)adef->multipleRuns),
+    double *unOptLikes = (double*)rax_malloc(sizeof(double) * (size_t)adef->multipleRuns),
             *optLikes   = (double*)rax_malloc(sizeof(double) * (size_t)adef->multipleRuns);
 
     int num_runs = adef->multipleRuns;
@@ -1459,9 +1439,8 @@ void doInference(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
     for(int run_no = 0; run_no < num_runs; run_no++)
     {
 #ifdef _WAYNE_MPI
-        if(run_no == 0)
-        {
-            if(parsimonySeed0 != 0)
+        if(run_no == 0) {
+            if (parsimonySeed0 != 0)
                 adef->parsimonySeed = parsimonySeed0 + 10000 * processID;
         }
         j = run_no + num_runs * processID;
@@ -1511,6 +1490,12 @@ void doInference(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
 
         loopTime = gettime() - loopTime;
         writeInfoFile(adef, tr, loopTime);
+        const double elapsed = gettime() - masterTime;
+        if (adef->stop_after_seconds > 0 && elapsed > adef->stop_after_seconds) {
+            num_runs = run_no + 1;
+            printBothOpenMPI("\n\nNo more runs (%d runs completed): --stop-after-seconds %d and elapsed time %f\n\n", num_runs, adef->stop_after_seconds, elapsed);
+            break;
+        }
     }
 
     assert(best >= 0);
@@ -1520,12 +1505,11 @@ void doInference(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
     num_runs = num_runs * processes;
 #endif
 
-    if(tr->catOnly) {
+    if (tr->catOnly) {
         printBothOpenMPI("\n\nNOT conducting any final model optimizations on all %d trees under CAT-based model ....\n", num_runs);
         printBothOpenMPI("\nREMEMBER that CAT-based likelihood scores are meaningless!\n\n", num_runs);
 #ifdef _WAYNE_MPI
-        if(processID != 0)
-        {
+        if (processID != 0) {
             MPI_Finalize();
             exit(0);
         }
@@ -1709,7 +1693,7 @@ void doInference(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
         assert(newBest >= 0);
 
 #ifdef _WAYNE_MPI
-        if(processes > 1) {
+        if (processes > 1) {
             double *buffer = (double *)rax_malloc(sizeof(double) * processes);
             for(int i8 = 0; i8 < processes; i8++)
                 buffer[i8] = unlikely;
@@ -1805,7 +1789,6 @@ void doInference(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
     if(processID == bestProcess)
     {
 #endif
-        overallTime = gettime() - masterTime;
 
         printBothOpen("Program execution info written to %s\n", infoFileName);
 
@@ -1834,6 +1817,7 @@ void doInference(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
             printBothOpen("Mesquite tree file (excluding best final Tree) written to: %s\n\n", mesquiteMLTrees);
 
 
+        const double overallTime = gettime() - masterTime;
         printBothOpen("Overall execution time: %f secs or %f hours or %f days\n\n", overallTime, overallTime/3600.0, overallTime/86400.0);
 #ifdef _WAYNE_MPI
     }
