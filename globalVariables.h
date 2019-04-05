@@ -38,7 +38,7 @@ int processes;
 
 int processID;
 infoList iList;
-FILE   *INFILE;
+// FILE   *INFILE;
 
 int Thorough = 0;
 

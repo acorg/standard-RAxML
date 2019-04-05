@@ -58,7 +58,7 @@ extern char resultFileName[1024];
 extern char tree_file[1024];
 extern char workdir[1024];
 extern char run_id[128];
-extern FILE *INFILE;
+// extern FILE *INFILE;
 extern double masterTime;
 
 

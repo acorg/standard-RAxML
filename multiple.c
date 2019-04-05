@@ -1436,26 +1436,13 @@ static void printMesquiteLog(analdef *adef, double l1, double l2, boolean justOn
 
 #if defined(_OPENMP)
 
-static tree* init_clone_tree(tree* source)
-{
-    tree* tr = (tree *)rax_malloc(sizeof(tree));
-    memcpy(tr, source, sizeof(tree));
-    return tr;
-}
-
-static void free_tree(tree* tr)
-{
-    rax_free(tr);
-}
-
-
 // #define CLONE_TYPE(TYPE) static TYPE* clone_##TYPE(TYPE* source, size_t size) \
 // { \
-//     if (source == NULL) \
-//         return NULL; \
-//     TYPE* result = (TYPE *)rax_malloc(sizeof(*source) * size); \
-//     memcpy(result, source, sizeof(*source) * size); \
-//     return result; \
+//      if (source == NULL) \
+//          return NULL; \
+//      TYPE* result = (TYPE *)rax_malloc(sizeof(*source) * size); \
+//      memcpy(result, source, sizeof(*source) * size); \
+//      return result; \
 // }
 
 // CLONE_TYPE(int)
@@ -1465,6 +1452,22 @@ static void free_tree(tree* tr)
 // CLONE_TYPE(double)
 // CLONE_TYPE(stringHashtable)
 // CLONE_TYPE(pInfo)
+
+extern boolean setupTree(tree *tr, analdef *adef);
+
+static tree* init_clone_tree(tree* source, analdef *adef)
+{
+    tree* tr = (tree *)rax_malloc(sizeof(tree));
+    memcpy(tr, source, sizeof(tree));
+    setupTree(tr, adef);
+    return tr;
+}
+
+static void free_tree(tree* tr)
+{
+    rax_free(tr);
+}
+
 
 // static tree* init_clone_tree(tree* source, analdef *adef, rawdata *rdta)
 // {
@@ -1714,7 +1717,7 @@ void doInference(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
 
     const int number_of_runs = adef->multipleRuns;
 
-    int best = -1, newBest = -1;
+    int best = 0, newBest = -1;
     double bestLH = unlikely;
     char bestTreeFileName[1024];
 
@@ -1729,30 +1732,35 @@ void doInference(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
 
     topolRELL_LIST *rl = (topolRELL_LIST *)rax_malloc(sizeof(topolRELL_LIST));
     initTL(rl, tr, number_of_runs);
-    getStartingTree(tr, adef);
+    // getStartingTree(tr, adef);
 
+#pragma omp parallel for default(none) shared(best, bestLH, rl, tr, rdta, cdta, adef, unOptLikes, masterTime) num_threads(6) schedule(static, 1)
     for (int thread_no = 0; thread_no < number_of_runs; ++thread_no) {
         printf(">>> %d doInference [%f]\n", thread_no, gettime() - masterTime);
-        tree* tr_for_thread = init_clone_tree(tr);
+        printf("\n>>> %d doInference init_clone_tree [%f]\n", thread_no, gettime() - masterTime);
+        tree* tr_for_thread = init_clone_tree(tr, adef);
+        printf("\n>>> %d doInference init_clone_tree done [%f]\n", thread_no, gettime() - masterTime);
         tr_for_thread->treeID = thread_no;
         tr_for_thread->checkPointCounter = 0;
         const double loopTime = gettime();
         initModel(tr_for_thread, rdta, cdta, adef);
         if (thread_no == 0)
             printBaseFrequencies(tr_for_thread);
+        printf("\n>>> %d doInference getStartingTree [%f]\n", thread_no, gettime() - masterTime);
         getStartingTree(tr_for_thread, adef);
+        printf("\n>>> %d doInference getStartingTree done [%f]\n", thread_no, gettime() - masterTime);
 
-        computeBIGRAPID(tr_for_thread, adef, TRUE);
+        // computeBIGRAPID(tr_for_thread, adef, TRUE);
 
-        unOptLikes[thread_no] = tr_for_thread->likelihood;
+        // unOptLikes[thread_no] = tr_for_thread->likelihood;
 
-        if (tr_for_thread->likelihood > bestLH) {
-            best = thread_no;
-            bestLH = tr_for_thread->likelihood;
-        }
+        // if (tr_for_thread->likelihood > bestLH) {
+        //     best = thread_no;
+        //     bestLH = tr_for_thread->likelihood;
+        // }
 
-        saveTL(rl, tr_for_thread, thread_no);
-        writeInfoFile(adef, tr_for_thread, gettime() - loopTime);
+        // saveTL(rl, tr_for_thread, thread_no);
+        // writeInfoFile(adef, tr_for_thread, gettime() - loopTime);
         free_tree(tr_for_thread);
         printf(">>> %d doInference done [%f] [%f]\n", thread_no, gettime() - loopTime, gettime() - masterTime);
     }

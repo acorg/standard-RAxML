@@ -688,130 +688,130 @@ ssize_t rax_getline(char **lineptr, size_t *n, FILE *h)
 }
 
 
-static void getnums (rawdata *rdta, analdef *adef)
+static void getnums(FILE* infile, rawdata *rdta, analdef *adef)
 {
-  if(fscanf(INFILE, "%d %d", & rdta->numsp, & rdta->sites) != 2)
+    if(fscanf(infile, "%d %d", & rdta->numsp, & rdta->sites) != 2)
     {
-      char
-	*line = NULL;
+        char
+                *line = NULL;
 
-      size_t
-	len = 0;
+        size_t
+                len = 0;
 
-      ssize_t
-	read;
+        ssize_t
+                read;
 
-      int
-	sequenceLength = 0,
-	sequences = 0,
-	taxa = 0,
-	sites =0;
+        int
+                sequenceLength = 0,
+                sequences = 0,
+                taxa = 0,
+                sites =0;
 
-      if(processID == 0)
-	{
-	  printf("\nRAxML can't, parse the alignment file as phylip file \n");
-	  printf("it will now try to parse it as FASTA file\n\n");
-	}
+        if(processID == 0)
+        {
+            printf("\nRAxML can't, parse the alignment file as phylip file \n");
+            printf("it will now try to parse it as FASTA file\n\n");
+        }
 
-      while((read = rax_getline(&line, &len, INFILE)) != -1)
-	{
-	  ssize_t
-	    i = 0;
+        while((read = rax_getline(&line, &len, infile)) != -1)
+        {
+            ssize_t
+                    i = 0;
 
-	  while((i < read - 1) && (line[i] == ' ' || line[i] == '\t'))
-	    i++;
+            while((i < read - 1) && (line[i] == ' ' || line[i] == '\t'))
+                i++;
 
-	  if(line[i] == '>')
-	    {
-	      if(taxa == 1)
-		sequenceLength = sites;
+            if(line[i] == '>')
+            {
+                if(taxa == 1)
+                    sequenceLength = sites;
 
-	      if(taxa > 0)
-		{
-		  if(sites == 0 && processID == 0)
-		    {
-		      printf("Fasta parsing error, RAxML was expecting sequence data before: %s\n", line);
-		      errorExit(-1);
-		    }
-		  assert(sites > 0);
-		  sequences++;
-		}
+                if(taxa > 0)
+                {
+                    if(sites == 0 && processID == 0)
+                    {
+                        printf("Fasta parsing error, RAxML was expecting sequence data before: %s\n", line);
+                        errorExit(-1);
+                    }
+                    assert(sites > 0);
+                    sequences++;
+                }
 
-	      if(taxa > 0)
-		{
-		  if(sequenceLength != sites && processID == 0)
-		    {
-		      printf("Fasta parsing error, RAxML expects an alignment.\n");
-		      printf("the sequence before taxon %s: seems to have a different length\n", line);
-		      errorExit(-1);
-		    }
-		  assert(sequenceLength == sites);
-		}
+                if(taxa > 0)
+                {
+                    if(sequenceLength != sites && processID == 0)
+                    {
+                        printf("Fasta parsing error, RAxML expects an alignment.\n");
+                        printf("the sequence before taxon %s: seems to have a different length\n", line);
+                        errorExit(-1);
+                    }
+                    assert(sequenceLength == sites);
+                }
 
-	      taxa++;
+                taxa++;
 
-	      sites = 0;
-	    }
-	  else
-	    {
-	      while(i < read - 1)
-		{
-		  if(!(line[i] == ' ' || line[i] == '\t'))
-		    {
-		      sites++;
-		    }
-		  i++;
-		}
-	      //printf("sites %d %s\n", sites, line);
-	    }
-	}
+                sites = 0;
+            }
+            else
+            {
+                while(i < read - 1)
+                {
+                    if(!(line[i] == ' ' || line[i] == '\t'))
+                    {
+                        sites++;
+                    }
+                    i++;
+                }
+                //printf("sites %d %s\n", sites, line);
+            }
+        }
 
-      if(sites > 0)
-	sequences++;
-      if(taxa != sequences && processID == 0)
-	{
-	  printf("Fasta parsing error, the number of taxa %d and sequences %d are not equal!\n", taxa, sequences);
-	  errorExit(-1);
-	}
-      assert(taxa == sequences);
+        if(sites > 0)
+            sequences++;
+        if(taxa != sequences && processID == 0)
+        {
+            printf("Fasta parsing error, the number of taxa %d and sequences %d are not equal!\n", taxa, sequences);
+            errorExit(-1);
+        }
+        assert(taxa == sequences);
 
-      if(sequenceLength != sites && processID == 0)
-	{
-	  printf("Fasta parsing error, RAxML expects an alignment.\n");
-	  printf("the last sequence in the alignment seems to have a different length\n");
-	  errorExit(-1);
-	}
+        if(sequenceLength != sites && processID == 0)
+        {
+            printf("Fasta parsing error, RAxML expects an alignment.\n");
+            printf("the last sequence in the alignment seems to have a different length\n");
+            errorExit(-1);
+        }
 
-      assert(sites == sequenceLength);
+        assert(sites == sequenceLength);
 
-      if(line)
-	rax_free(line);
+        if(line)
+            rax_free(line);
 
-      rewind(INFILE);
+        rewind(infile);
 
-      adef->alignmentFileType = FASTA;
+        adef->alignmentFileType = FASTA;
 
-      rdta->numsp = taxa;
-      rdta->sites = sites;
+        rdta->numsp = taxa;
+        rdta->sites = sites;
     }
 
 
 
-  if (rdta->numsp < 4)
+    if (rdta->numsp < 4)
     {
-      if(processID == 0)
-	printf("TOO FEW SPECIES\n");
-      errorExit(-1);
+        if(processID == 0)
+            printf("TOO FEW SPECIES\n");
+        errorExit(-1);
     }
 
-  if (rdta->sites < 1)
+    if (rdta->sites < 1)
     {
-      if(processID == 0)
-	printf("TOO FEW SITES\n");
-      errorExit(-1);
+        if(processID == 0)
+            printf("TOO FEW SITES\n");
+        errorExit(-1);
     }
 
-  return;
+    return;
 }
 
 
@@ -884,7 +884,7 @@ static unsigned int KISS32(void)
   return (x+y+w);
 }
 
-static boolean setupTree (tree *tr, analdef *adef)
+boolean setupTree(tree *tr, analdef *adef)
 {
   nodeptr  p0 = NULL, p = NULL, q = NULL;
   int
@@ -1118,350 +1118,350 @@ static void printParsingErrorContext(FILE *f)
   printf("\n\n");
 }
 
-static boolean getdata(analdef *adef, rawdata *rdta, tree *tr)
+static boolean getdata(FILE* infile, analdef *adef, rawdata *rdta, tree *tr)
 {
-  int
-    i,
-    j,
-    basesread,
-    basesnew,
-    ch, my_i, meaning,
-    len,
-    meaningAA[256],
-    meaningDNA[256],
-    meaningBINARY[256],
-    meaningGeneric32[256],
-    meaningGeneric64[256];
+    int
+            i,
+            j,
+            basesread,
+            basesnew,
+            ch, my_i, meaning,
+            len,
+            meaningAA[256],
+            meaningDNA[256],
+            meaningBINARY[256],
+            meaningGeneric32[256],
+            meaningGeneric64[256];
 
-  boolean
-    allread,
-    firstpass;
+    boolean
+            allread,
+            firstpass;
 
-  char
-    buffer[nmlngth + 2];
+    char
+            buffer[nmlngth + 2];
 
-  unsigned char
-    genericChars32[32] = {'0', '1', '2', '3', '4', '5', '6', '7',
-			  '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
-			  'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
-			  'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V'};
-  uint64_t
-    total = 0,
-    gaps  = 0;
+    unsigned char
+            genericChars32[32] = {'0', '1', '2', '3', '4', '5', '6', '7',
+                                  '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
+                                  'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+                                  'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V'};
+    uint64_t
+            total = 0,
+            gaps  = 0;
 
-  for (i = 0; i < 256; i++)
+    for (i = 0; i < 256; i++)
     {
-      meaningAA[i]          = -1;
-      meaningDNA[i]         = -1;
-      meaningBINARY[i]      = -1;
-      meaningGeneric32[i]   = -1;
-      meaningGeneric64[i]   = -1;
+        meaningAA[i]          = -1;
+        meaningDNA[i]         = -1;
+        meaningBINARY[i]      = -1;
+        meaningGeneric32[i]   = -1;
+        meaningGeneric64[i]   = -1;
     }
 
-  /* generic 32 data */
+    /* generic 32 data */
 
-  for(i = 0; i < 32; i++)
-    meaningGeneric32[genericChars32[i]] = i;
-  meaningGeneric32['-'] = getUndetermined(GENERIC_32);
-  meaningGeneric32['?'] = getUndetermined(GENERIC_32);
+    for(i = 0; i < 32; i++)
+        meaningGeneric32[genericChars32[i]] = i;
+    meaningGeneric32['-'] = getUndetermined(GENERIC_32);
+    meaningGeneric32['?'] = getUndetermined(GENERIC_32);
 
-  /* AA data */
+    /* AA data */
 
-  meaningAA['A'] =  0;  /* alanine */
-  meaningAA['R'] =  1;  /* arginine */
-  meaningAA['N'] =  2;  /*  asparagine*/
-  meaningAA['D'] =  3;  /* aspartic */
-  meaningAA['C'] =  4;  /* cysteine */
-  meaningAA['Q'] =  5;  /* glutamine */
-  meaningAA['E'] =  6;  /* glutamic */
-  meaningAA['G'] =  7;  /* glycine */
-  meaningAA['H'] =  8;  /* histidine */
-  meaningAA['I'] =  9;  /* isoleucine */
-  meaningAA['L'] =  10; /* leucine */
-  meaningAA['K'] =  11; /* lysine */
-  meaningAA['M'] =  12; /* methionine */
-  meaningAA['F'] =  13; /* phenylalanine */
-  meaningAA['P'] =  14; /* proline */
-  meaningAA['S'] =  15; /* serine */
-  meaningAA['T'] =  16; /* threonine */
-  meaningAA['W'] =  17; /* tryptophan */
-  meaningAA['Y'] =  18; /* tyrosine */
-  meaningAA['V'] =  19; /* valine */
-  meaningAA['B'] =  20; /* asparagine, aspartic 2 and 3*/
-  meaningAA['Z'] =  21; /*21 glutamine glutamic 5 and 6*/
+    meaningAA['A'] =  0;  /* alanine */
+    meaningAA['R'] =  1;  /* arginine */
+    meaningAA['N'] =  2;  /*  asparagine*/
+    meaningAA['D'] =  3;  /* aspartic */
+    meaningAA['C'] =  4;  /* cysteine */
+    meaningAA['Q'] =  5;  /* glutamine */
+    meaningAA['E'] =  6;  /* glutamic */
+    meaningAA['G'] =  7;  /* glycine */
+    meaningAA['H'] =  8;  /* histidine */
+    meaningAA['I'] =  9;  /* isoleucine */
+    meaningAA['L'] =  10; /* leucine */
+    meaningAA['K'] =  11; /* lysine */
+    meaningAA['M'] =  12; /* methionine */
+    meaningAA['F'] =  13; /* phenylalanine */
+    meaningAA['P'] =  14; /* proline */
+    meaningAA['S'] =  15; /* serine */
+    meaningAA['T'] =  16; /* threonine */
+    meaningAA['W'] =  17; /* tryptophan */
+    meaningAA['Y'] =  18; /* tyrosine */
+    meaningAA['V'] =  19; /* valine */
+    meaningAA['B'] =  20; /* asparagine, aspartic 2 and 3*/
+    meaningAA['Z'] =  21; /*21 glutamine glutamic 5 and 6*/
 
-  meaningAA['X'] =
-    meaningAA['?'] =
-    meaningAA['*'] =
-    meaningAA['-'] =
-    getUndetermined(AA_DATA);
+    meaningAA['X'] =
+            meaningAA['?'] =
+            meaningAA['*'] =
+            meaningAA['-'] =
+            getUndetermined(AA_DATA);
 
-  /* DNA data */
+    /* DNA data */
 
-  meaningDNA['A'] =  1;
-  meaningDNA['B'] = 14;
-  meaningDNA['C'] =  2;
-  meaningDNA['D'] = 13;
-  meaningDNA['G'] =  4;
-  meaningDNA['H'] = 11;
-  meaningDNA['K'] = 12;
-  meaningDNA['M'] =  3;
-  meaningDNA['R'] =  5;
-  meaningDNA['S'] =  6;
-  meaningDNA['T'] =  8;
-  meaningDNA['U'] =  8;
-  meaningDNA['V'] =  7;
-  meaningDNA['W'] =  9;
-  meaningDNA['Y'] = 10;
+    meaningDNA['A'] =  1;
+    meaningDNA['B'] = 14;
+    meaningDNA['C'] =  2;
+    meaningDNA['D'] = 13;
+    meaningDNA['G'] =  4;
+    meaningDNA['H'] = 11;
+    meaningDNA['K'] = 12;
+    meaningDNA['M'] =  3;
+    meaningDNA['R'] =  5;
+    meaningDNA['S'] =  6;
+    meaningDNA['T'] =  8;
+    meaningDNA['U'] =  8;
+    meaningDNA['V'] =  7;
+    meaningDNA['W'] =  9;
+    meaningDNA['Y'] = 10;
 
-  meaningDNA['N'] =
-    meaningDNA['O'] =
-    meaningDNA['X'] =
-    meaningDNA['-'] =
-    meaningDNA['?'] =
-    getUndetermined(DNA_DATA);
+    meaningDNA['N'] =
+            meaningDNA['O'] =
+            meaningDNA['X'] =
+            meaningDNA['-'] =
+            meaningDNA['?'] =
+            getUndetermined(DNA_DATA);
 
-  /* BINARY DATA */
+    /* BINARY DATA */
 
-  meaningBINARY['0'] = 1;
-  meaningBINARY['1'] = 2;
+    meaningBINARY['0'] = 1;
+    meaningBINARY['1'] = 2;
 
-  meaningBINARY['-'] =
-    meaningBINARY['?'] =
-    getUndetermined(BINARY_DATA);
+    meaningBINARY['-'] =
+            meaningBINARY['?'] =
+            getUndetermined(BINARY_DATA);
 
 
-  /*******************************************************************/
+    /*******************************************************************/
 
-  basesread = basesnew = 0;
+    basesread = basesnew = 0;
 
-  allread = FALSE;
-  firstpass = TRUE;
-  ch = ' ';
+    allread = FALSE;
+    firstpass = TRUE;
+    ch = ' ';
 
-  while (! allread)
+    while (! allread)
     {
-      for(i = 1; i <= tr->mxtips; i++)
-	{
-	  if(firstpass)
-	    {
-	      ch = getc(INFILE);
+        for(i = 1; i <= tr->mxtips; i++)
+        {
+            if(firstpass)
+            {
+                ch = getc(infile);
 
-	      while(ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r')
-		ch = getc(INFILE);
+                while(ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r')
+                    ch = getc(infile);
 
-	      my_i = 0;
+                my_i = 0;
 
-	      do
-		{
-		  buffer[my_i] = ch;
-		  ch = getc(INFILE);
-		  my_i++;
-		  if(my_i >= nmlngth)
-		    {
-		      if(processID == 0)
-			{
-			  printf("Taxon Name too long at taxon %d, adapt constant nmlngth in\n", i);
-			  printf("axml.h, current setting %d\n", nmlngth);
-			}
-		      errorExit(-1);
-		    }
-		}
-	      while(ch !=  ' ' && ch != '\n' && ch != '\t' && ch != '\r');
+                do
+                {
+                    buffer[my_i] = ch;
+                    ch = getc(infile);
+                    my_i++;
+                    if(my_i >= nmlngth)
+                    {
+                        if(processID == 0)
+                        {
+                            printf("Taxon Name too long at taxon %d, adapt constant nmlngth in\n", i);
+                            printf("axml.h, current setting %d\n", nmlngth);
+                        }
+                        errorExit(-1);
+                    }
+                }
+                while(ch !=  ' ' && ch != '\n' && ch != '\t' && ch != '\r');
 
-	      buffer[my_i] = '\0';
-	      len = strlen(buffer) + 1;
-	      checkTaxonName(buffer, len);
-	      tr->nameList[i] = (char *)rax_malloc(sizeof(char) * len);
-	      strcpy(tr->nameList[i], buffer);
+                buffer[my_i] = '\0';
+                len = strlen(buffer) + 1;
+                checkTaxonName(buffer, len);
+                tr->nameList[i] = (char *)rax_malloc(sizeof(char) * len);
+                strcpy(tr->nameList[i], buffer);
 
-	      while(ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r')
-		ch = getc(INFILE);
+                while(ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r')
+                    ch = getc(infile);
 
-	      ungetc(ch, INFILE);
-	    }
+                ungetc(ch, infile);
+            }
 
-	  j = basesread;
+            j = basesread;
 
-	  while((j < rdta->sites) && ((ch = getc(INFILE)) != EOF) && (ch != '\n') && (ch != '\r'))
-	    {
-	      uppercase(& ch);
+            while((j < rdta->sites) && ((ch = getc(infile)) != EOF) && (ch != '\n') && (ch != '\r'))
+            {
+                uppercase(& ch);
 
-	      assert(tr->dataVector[j + 1] != -1);
+                assert(tr->dataVector[j + 1] != -1);
 
-	      switch(tr->dataVector[j + 1])
-		{
-		case BINARY_DATA:
-		  meaning = meaningBINARY[ch];
-		  break;
-		case DNA_DATA:
-		case SECONDARY_DATA:
-		case SECONDARY_DATA_6:
-		case SECONDARY_DATA_7:
-		  /*
-		     still dealing with DNA/RNA here, hence just act if as they where DNA characters
-		     corresponding column merging for sec struct models will take place later
-		  */
-		  meaning = meaningDNA[ch];
-		  break;
-		case AA_DATA:
-		  meaning = meaningAA[ch];
-		  break;
-		case GENERIC_32:
-		  meaning = meaningGeneric32[ch];
-		  break;
-		case GENERIC_64:
-		  meaning = meaningGeneric64[ch];
-		  break;
-		default:
-		  assert(0);
-		}
+                switch(tr->dataVector[j + 1])
+                {
+                  case BINARY_DATA:
+                      meaning = meaningBINARY[ch];
+                      break;
+                  case DNA_DATA:
+                  case SECONDARY_DATA:
+                  case SECONDARY_DATA_6:
+                  case SECONDARY_DATA_7:
+                      /*
+                        still dealing with DNA/RNA here, hence just act if as they where DNA characters
+                        corresponding column merging for sec struct models will take place later
+                      */
+                      meaning = meaningDNA[ch];
+                      break;
+                  case AA_DATA:
+                      meaning = meaningAA[ch];
+                      break;
+                  case GENERIC_32:
+                      meaning = meaningGeneric32[ch];
+                      break;
+                  case GENERIC_64:
+                      meaning = meaningGeneric64[ch];
+                      break;
+                  default:
+                      assert(0);
+                }
 
-	      if (meaning != -1)
-		{
-		  j++;
-		  rdta->y[i][j] = ch;
-		}
-	      else
-		{
-		  if(!whitechar(ch))
-		    {
-		      printf("ERROR: Bad base (%c) at site %d of sequence %d\n",
-			     ch, j + 1, i);
+                if (meaning != -1)
+                {
+                    j++;
+                    rdta->y[i][j] = ch;
+                }
+                else
+                {
+                    if(!whitechar(ch))
+                    {
+                        printf("ERROR: Bad base (%c) at site %d of sequence %d\n",
+                               ch, j + 1, i);
 
-		      printParsingErrorContext(INFILE);
+                        printParsingErrorContext(infile);
 
-		      return FALSE;
-		    }
-		}
-	    }
+                        return FALSE;
+                    }
+                }
+            }
 
-	  if (ch == EOF)
-	    {
-	      printf("ERROR: End-of-file at site %d of sequence %d\n", j + 1, i);
+            if (ch == EOF)
+            {
+                printf("ERROR: End-of-file at site %d of sequence %d\n", j + 1, i);
 
-	      printParsingErrorContext(INFILE);
+                printParsingErrorContext(infile);
 
-	      return  FALSE;
-	    }
+                return  FALSE;
+            }
 
-	  if (! firstpass && (j == basesread))
-	    i--;
-	  else
-	    {
-	      if (i == 1)
-		basesnew = j;
-	      else
-		if (j != basesnew)
-		  {
-		    printf("ERROR: Sequences out of alignment\n");
-		    printf("%d (instead of %d) residues read in sequence %d %s\n",
-			   j - basesread, basesnew - basesread, i, tr->nameList[i]);
+            if (! firstpass && (j == basesread))
+                i--;
+            else
+            {
+                if (i == 1)
+                    basesnew = j;
+                else
+                    if (j != basesnew)
+                    {
+                        printf("ERROR: Sequences out of alignment\n");
+                        printf("%d (instead of %d) residues read in sequence %d %s\n",
+                               j - basesread, basesnew - basesread, i, tr->nameList[i]);
 
-		     printParsingErrorContext(INFILE);
+                        printParsingErrorContext(infile);
 
-		    return  FALSE;
-		  }
-	    }
-	  while (ch != '\n' && ch != EOF && ch != '\r')
-	    ch = getc(INFILE);  /* flush line *//* PC-LINEBREAK*/
-	}
+                        return  FALSE;
+                    }
+            }
+            while (ch != '\n' && ch != EOF && ch != '\r')
+                ch = getc(infile);  /* flush line *//* PC-LINEBREAK*/
+        }
 
-      firstpass = FALSE;
-      basesread = basesnew;
-      allread = (basesread >= rdta->sites);
+        firstpass = FALSE;
+        basesread = basesnew;
+        allread = (basesread >= rdta->sites);
     }
 
-  if(ch != EOF)
+    if(ch != EOF)
     {
-      int
-	garbageCount = 0;
+        int
+                garbageCount = 0;
 
-      do
-	{
-	  if(!whitechar(ch))
-	    garbageCount++;
+        do
+        {
+            if(!whitechar(ch))
+                garbageCount++;
 
-	  if(garbageCount > 0)
-	    {
-	      if(garbageCount == 1)
-		printf("\nOups, there is garbage at the end of your file:\n\n");
-	      if(garbageCount < 1000)
-		printf("%c", ch);
-	      if(garbageCount == 1000)
-		printf("\n .... and so on\n");
-	    }
-	}
-      while((ch = getc(INFILE)) != EOF);
+            if(garbageCount > 0)
+            {
+                if(garbageCount == 1)
+                    printf("\nOups, there is garbage at the end of your file:\n\n");
+                if(garbageCount < 1000)
+                    printf("%c", ch);
+                if(garbageCount == 1000)
+                    printf("\n .... and so on\n");
+            }
+        }
+        while((ch = getc(infile)) != EOF);
 
-      if(garbageCount > 0)
-	{
-	  printf("\n\nRAxML correctly finished parsing your PHYLIP file,\n");
-	  printf("but there seems to be garbage at the end of the file, i.e., non-whitespace characters!\n");
-	  printf("RAxML will exit now\n\n");
-	  errorExit(-1);
-	}
+        if(garbageCount > 0)
+        {
+            printf("\n\nRAxML correctly finished parsing your PHYLIP file,\n");
+            printf("but there seems to be garbage at the end of the file, i.e., non-whitespace characters!\n");
+            printf("RAxML will exit now\n\n");
+            errorExit(-1);
+        }
     }
 
-  for(j = 1; j <= tr->mxtips; j++)
-    for(i = 1; i <= rdta->sites; i++)
-      {
-	assert(tr->dataVector[i] != -1);
+    for(j = 1; j <= tr->mxtips; j++)
+        for(i = 1; i <= rdta->sites; i++)
+        {
+            assert(tr->dataVector[i] != -1);
 
-	switch(tr->dataVector[i])
-	  {
-	  case BINARY_DATA:
-	    meaning = meaningBINARY[rdta->y[j][i]];
-	    if(meaning == getUndetermined(BINARY_DATA))
-	      gaps++;
-	    break;
+            switch(tr->dataVector[i])
+            {
+              case BINARY_DATA:
+                  meaning = meaningBINARY[rdta->y[j][i]];
+                  if(meaning == getUndetermined(BINARY_DATA))
+                      gaps++;
+                  break;
 
-	  case SECONDARY_DATA:
-	  case SECONDARY_DATA_6:
-	  case SECONDARY_DATA_7:
-	    assert(tr->secondaryStructurePairs[i - 1] != -1);
-	    assert(i - 1 == tr->secondaryStructurePairs[tr->secondaryStructurePairs[i - 1]]);
-	    /*
-	       don't worry too much about undetermined column count here for sec-struct, just count
-	       DNA/RNA gaps here and worry about the rest later-on, falling through to DNA again :-)
-	    */
-	  case DNA_DATA:
-	    meaning = meaningDNA[rdta->y[j][i]];
-	    if(meaning == getUndetermined(DNA_DATA))
-	      gaps++;
-	    break;
+              case SECONDARY_DATA:
+              case SECONDARY_DATA_6:
+              case SECONDARY_DATA_7:
+                  assert(tr->secondaryStructurePairs[i - 1] != -1);
+                  assert(i - 1 == tr->secondaryStructurePairs[tr->secondaryStructurePairs[i - 1]]);
+                  /*
+                    don't worry too much about undetermined column count here for sec-struct, just count
+                    DNA/RNA gaps here and worry about the rest later-on, falling through to DNA again :-)
+                  */
+              case DNA_DATA:
+                  meaning = meaningDNA[rdta->y[j][i]];
+                  if(meaning == getUndetermined(DNA_DATA))
+                      gaps++;
+                  break;
 
-	  case AA_DATA:
-	    meaning = meaningAA[rdta->y[j][i]];
-	    if(meaning == getUndetermined(AA_DATA))
-	      gaps++;
-	    break;
+              case AA_DATA:
+                  meaning = meaningAA[rdta->y[j][i]];
+                  if(meaning == getUndetermined(AA_DATA))
+                      gaps++;
+                  break;
 
-	  case GENERIC_32:
-	    meaning = meaningGeneric32[rdta->y[j][i]];
-	    if(meaning == getUndetermined(GENERIC_32))
-	      gaps++;
-	    break;
+              case GENERIC_32:
+                  meaning = meaningGeneric32[rdta->y[j][i]];
+                  if(meaning == getUndetermined(GENERIC_32))
+                      gaps++;
+                  break;
 
-	  case GENERIC_64:
-	    meaning = meaningGeneric64[rdta->y[j][i]];
-	    if(meaning == getUndetermined(GENERIC_64))
-	      gaps++;
-	    break;
-	  default:
-	    assert(0);
-	  }
+              case GENERIC_64:
+                  meaning = meaningGeneric64[rdta->y[j][i]];
+                  if(meaning == getUndetermined(GENERIC_64))
+                      gaps++;
+                  break;
+              default:
+                  assert(0);
+            }
 
-	total++;
-	rdta->y[j][i] = meaning;
-      }
+            total++;
+            rdta->y[j][i] = meaning;
+        }
 
-  adef->gapyness = (double)gaps / (double)total;
+    adef->gapyness = (double)gaps / (double)total;
 
-  return  TRUE;
+    return  TRUE;
 }
 
-static void parseFasta(analdef *adef, rawdata *rdta, tree *tr)
+static void parseFasta(FILE* infile, analdef *adef, rawdata *rdta, tree *tr)
 {
   int
     index,
@@ -1586,7 +1586,7 @@ static void parseFasta(analdef *adef, rawdata *rdta, tree *tr)
       sites = 0;
 
 
-    while((read = rax_getline(&line, &len, INFILE)) != -1)
+    while((read = rax_getline(&line, &len, infile)) != -1)
 	{
 	  ssize_t
 	    i = 0;
@@ -1823,11 +1823,11 @@ static void getinput(analdef *adef, rawdata *rdta, cruncheddata *cdta, tree *tr)
 {
     int i;
 
+    FILE* infile = NULL;
     if(!adef->readTaxaOnly)
     {
-        INFILE = myfopen(seq_file, "rb");
-
-        getnums(rdta, adef);
+        infile = myfopen(seq_file, "rb");
+        getnums(infile, rdta, adef);
     }
 
     tr->mxtips            = rdta->numsp;
@@ -1993,14 +1993,14 @@ static void getinput(analdef *adef, rawdata *rdta, cruncheddata *cdta, tree *tr)
         switch(adef->alignmentFileType)
         {
           case PHYLIP:
-              if(!getdata(adef, rdta, tr))
+              if(!getdata(infile, adef, rdta, tr))
               {
                   printf("Problem reading alignment file \n");
                   errorExit(1);
               }
               break;
           case FASTA:
-              parseFasta(adef, rdta, tr);
+              parseFasta(infile, adef, rdta, tr);
               break;
           default:
               assert(0);
@@ -2012,7 +2012,7 @@ static void getinput(analdef *adef, rawdata *rdta, cruncheddata *cdta, tree *tr)
             addword(tr->nameList[i], tr->nameHash, i);
         }
 
-        fclose(INFILE);
+        fclose(infile);
     }
 }
 
@@ -10616,7 +10616,7 @@ static void computeAllLHs(tree *tr, analdef *adef, char *bootStrapFileName)
   elw
     *list;
 
-  INFILE = getNumberOfTrees(tr, bootStrapFileName, adef);
+  // FILE* infile = getNumberOfTrees(tr, bootStrapFileName, adef);
 
   bestT = (bestlist *) rax_malloc(sizeof(bestlist));
   bestT->ninit = 0;
