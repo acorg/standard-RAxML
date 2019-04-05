@@ -30,7 +30,9 @@
  */
 
 #pragma GCC diagnostic ignored "-Wsign-conversion"
+#ifdef __clang__
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+#endif
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 
 #ifndef WIN32

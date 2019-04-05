@@ -31,7 +31,9 @@
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Wconversion"
+#ifdef __clang__
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+#endif
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wcast-qual"
 #pragma GCC diagnostic ignored "-Wfloat-equal"

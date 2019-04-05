@@ -30,7 +30,9 @@
 
 #pragma GCC diagnostic ignored "-Wcast-qual"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
+#ifdef __clang__
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+#endif
 
 #ifndef WIN32
 #include <sys/times.h>
