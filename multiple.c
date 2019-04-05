@@ -1446,6 +1446,10 @@ static void printMesquiteLog(analdef *adef, double l1, double l2, boolean justOn
 }
 
 CLONE_TYPE(int)
+CLONE_TYPE(unsigned)
+CLONE_TYPE(char)
+CLONE_TYPE(boolean)
+CLONE_TYPE(double)
 CLONE_TYPE(stringHashtable)
 CLONE_TYPE(pInfo)
 
@@ -1483,14 +1487,14 @@ static tree* init_clone_tree(tree* source, analdef *adef, rawdata *rdta)
     else
         assert(0);
 
-    int              *patternPosition;
-    int              *columnPosition;
-    char             *secondaryStructureInput;
-    boolean          *executeModel;
-    double           *perPartitionLH;
-    double           *storedPerPartitionLH;
-    traversalData td[1];
-    unsigned int *parsimonyScore;
+    tr->patternPosition = clone_int(source->patternPosition, rdta->sites);
+    tr->columnPosition = clone_int(source->columnPosition, rdta->sites);
+    tr->secondaryStructureInput = clone_char(source->secondaryStructureInput, rdta->sites);
+    tr->executeModel = clone_boolean(source->executeModel, tr->NumberOfModels);
+    tr->perPartitionLH = clone_double(source->perPartitionLH, tr->NumberOfModels);
+    tr->storedPerPartitionLH = clone_double(source->storedPerPartitionLH, tr->NumberOfModels);
+    tr->td[0] = source->td[0];
+    tr->parsimonyScore = clone_unsigned(source->parsimonyScore, 2 * tr->mxtips);
 
     tr->maxCategories = source->maxCategories;
 
@@ -1657,6 +1661,18 @@ static void free_tree(tree* tr)
     rax_free(tr->nameHash);
     rax_free(tr->inserts);
     rax_free(tr->ti);
+
+    rax_free(tr->initialPartitionData);
+    rax_free(tr->extendedPartitionData);
+    rax_free(tr->initialDataVector);
+    rax_free(tr->extendedDataVector);
+    rax_free(tr->patternPosition);
+    rax_free(tr->columnPosition);
+    rax_free(tr->secondaryStructureInput);
+    rax_free(tr->executeModel);
+    rax_free(tr->perPartitionLH);
+    rax_free(tr->storedPerPartitionLH);
+    rax_free(tr->parsimonyScore);
 
     rax_free(tr->resample);
     rax_free(tr->rellTrees);
