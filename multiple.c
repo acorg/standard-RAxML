@@ -1,10 +1,10 @@
-/*  RAxML-VI-HPC (version 2.2) a program for sequential and parallel estimation of phylogenetic trees 
+/*  RAxML-VI-HPC (version 2.2) a program for sequential and parallel estimation of phylogenetic trees
  *  Copyright August 2006 by Alexandros Stamatakis
  *
  *  Partially derived from
  *  fastDNAml, a program for estimation of phylogenetic trees from sequences by Gary J. Olsen
- *  
- *  and 
+ *
+ *  and
  *
  *  Programs of the PHYLIP package by Joe Felsenstein.
  *
@@ -17,14 +17,14 @@
  *  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
  *  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
  *  for more details.
- * 
+ *
  *
  *  For any other enquiries send an Email to Alexandros Stamatakis
  *  Alexandros.Stamatakis@epfl.ch
  *
  *  When publishing work that is based on the results from RAxML-VI-HPC please cite:
  *
- *  Alexandros Stamatakis:"RAxML-VI-HPC: maximum likelihood-based phylogenetic analyses with thousands of taxa and mixed models". 
+ *  Alexandros Stamatakis:"RAxML-VI-HPC: maximum likelihood-based phylogenetic analyses with thousands of taxa and mixed models".
  *  Bioinformatics 2006; doi: 10.1093/bioinformatics/btl446
  */
 
@@ -37,7 +37,7 @@
 #endif
 
 #include <math.h>
-#include <time.h> 
+#include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -64,8 +64,8 @@ extern double masterTime;
 extern FILE   *INFILE, *permutationFile, *logFile, *infoFile;
 
 extern char seq_file[1024];
-extern char permFileName[1024], resultFileName[1024], 
-  logFileName[1024], checkpointFileName[1024], infoFileName[1024], run_id[128], workdir[1024], bootStrapFile[1024], bootstrapFileName[1024], 
+extern char permFileName[1024], resultFileName[1024],
+  logFileName[1024], checkpointFileName[1024], infoFileName[1024], run_id[128], workdir[1024], bootStrapFile[1024], bootstrapFileName[1024],
   bipartitionsFileName[1024],bipartitionsFileNameBranchLabels[1024], rellBootstrapFileNamePID[1024], mesquiteTrees[1024],
   mesquiteModel[1024], mesquiteMLTrees[1024], mesquiteMLLikes[1024];
 
@@ -74,16 +74,16 @@ extern char permFileName[1024], resultFileName[1024],
 
 void catToGamma(tree *tr, analdef *adef)
 {
-  assert(tr->rateHetModel == CAT);  
-  
+  assert(tr->rateHetModel == CAT);
+
   if(adef->useInvariant)
     tr->rateHetModel = GAMMA_I;
   else
     tr->rateHetModel = GAMMA;
 
-  
+
 #ifdef _USE_PTHREADS
-  masterBarrier(THREAD_CAT_TO_GAMMA, tr); 
+  masterBarrier(THREAD_CAT_TO_GAMMA, tr);
 #endif
 }
 
@@ -91,13 +91,13 @@ void gammaToCat(tree *tr)
 {
 
   assert(tr->rateHetModel == GAMMA || tr->rateHetModel == GAMMA_I);
-   
+
   tr->rateHetModel = CAT;
 
- 
+
 #ifdef _USE_PTHREADS
-  masterBarrier(THREAD_GAMMA_TO_CAT, tr); 
-#endif  
+  masterBarrier(THREAD_GAMMA_TO_CAT, tr);
+#endif
 }
 
 
@@ -105,11 +105,11 @@ static void singleBootstrap(tree *tr, int i, analdef *adef, rawdata *rdta, crunc
 {
   tr->treeID = i;
   tr->checkPointCounter = 0;
-     
+
   computeNextReplicate(tr, &adef->boot, (int*)NULL, (int*)NULL, FALSE, FALSE, adef);
-  
-  initModel(tr, rdta, cdta, adef);                                   
-         
+
+  initModel(tr, rdta, cdta, adef);
+
   getStartingTree(tr, adef);
 
   computeBIGRAPID(tr, adef, TRUE);
@@ -118,27 +118,27 @@ static void singleBootstrap(tree *tr, int i, analdef *adef, rawdata *rdta, crunc
     {
       switch(tr->rateHetModel)
 	{
-	case GAMMA:	  
-	case GAMMA_I:      
-	  modOpt(tr, adef, TRUE, adef->likelihoodEpsilon);		      	    	    
+	case GAMMA:
+	case GAMMA_I:
+	  modOpt(tr, adef, TRUE, adef->likelihoodEpsilon);
 	  break;
-	case CAT:    	      	 		  
-	  tr->likelihood = unlikely;	       
-	  catToGamma(tr, adef);	  
+	case CAT:
+	  tr->likelihood = unlikely;
+	  catToGamma(tr, adef);
 	  initModel(tr, rdta, cdta, adef);
 	  if(i == 0)
-	    modOpt(tr, adef, TRUE, adef->likelihoodEpsilon);	 
+	    modOpt(tr, adef, TRUE, adef->likelihoodEpsilon);
 	  else
 	    modOpt(tr, adef, TRUE, adef->likelihoodEpsilon);
-	  gammaToCat(tr); 		  	      	        	
+	  gammaToCat(tr);
 	  break;
 	default:
 	  assert(0);
 	}
-    }  
+    }
 
 
-   printBootstrapResult(tr, adef, TRUE);    
+   printBootstrapResult(tr, adef, TRUE);
 }
 
 
@@ -154,10 +154,10 @@ static int compareTopolRell(const void *p1, const void *p2)
 {
   topolRELL **rc1 = (topolRELL **)p1;
   topolRELL **rc2 = (topolRELL **)p2;
- 
+
   double i = (*rc1)->likelihood;
   double j = (*rc2)->likelihood;
-  
+
   if (i > j)
     return (-1);
   if (i < j)
@@ -168,77 +168,74 @@ static int compareTopolRell(const void *p1, const void *p2)
 
 void fixModelIndices(tree *tr, int endsite, boolean fixRates)
 {
-  int model, i;
+    int model, i;
 
-  assert(tr->NumberOfModels > 0);   
+    assert(tr->NumberOfModels > 0);
 
-  tr->partitionData[0].lower = 0;
-     
-  model = tr->model[0];
-  i = 1;
+    tr->partitionData[0].lower = 0;
 
-  while(i < endsite)
+    model = tr->model[0];
+    i = 1;
+
+    while(i < endsite)
     {
-      if(tr->model[i] != model)
-	{	      
-	  tr->partitionData[model].upper = i;
-	  tr->partitionData[model + 1].lower = i;
-	  model = tr->model[i];
-	}
-      i++;
-    }       
-  
-  tr->partitionData[tr->NumberOfModels - 1].upper = endsite;
-  
-  for(model = 0; model < tr->NumberOfModels; model++)    
-    tr->partitionData[model].width = tr->partitionData[model].upper -  tr->partitionData[model].lower;
- 
-  
+        if(tr->model[i] != model)
+        {
+            tr->partitionData[model].upper = i;
+            tr->partitionData[model + 1].lower = i;
+            model = tr->model[i];
+        }
+        i++;
+    }
+
+    tr->partitionData[tr->NumberOfModels - 1].upper = endsite;
+
+    for(model = 0; model < tr->NumberOfModels; model++)
+        tr->partitionData[model].width = tr->partitionData[model].upper -  tr->partitionData[model].lower;
+
+
 #ifndef _USE_PTHREADS
-  for(model = 0; model < tr->NumberOfModels; model++)
+    for(model = 0; model < tr->NumberOfModels; model++)
     {
-      int 
-	j,
-	lower =  tr->partitionData[model].lower;
-      
-      /* SOS what about sumBuffer? */
-      /* tr->partitionData[model].sumBuffer    = &tr->sumBuffer[offset]; */
-      tr->partitionData[model].perSiteLL    = &tr->perSiteLL[lower];     
-      tr->partitionData[model].wgt          = &tr->cdta->aliaswgt[lower];
-      
+        int j1, lower =  tr->partitionData[model].lower;
 
-      tr->partitionData[model].invariant    = &tr->invariant[lower];
-      tr->partitionData[model].rateCategory = &tr->cdta->rateCategory[lower];
-      
+        /* SOS what about sumBuffer? */
+        /* tr->partitionData[model].sumBuffer    = &tr->sumBuffer[offset]; */
+        tr->partitionData[model].perSiteLL    = &tr->perSiteLL[lower];
+        tr->partitionData[model].wgt          = &tr->cdta->aliaswgt[lower];
 
-      for(j = 1; j <= tr->mxtips; j++)
-	tr->partitionData[model].yVector[j] = &(tr->yVector[j][tr->partitionData[model].lower]);
 
-      
-      {
-	int 
-	  width =  tr->partitionData[model].width,
-	  undetermined = getUndetermined(tr->partitionData[model].dataType),
-	  j;		         		     
-	
-	tr->partitionData[model].gapVectorLength = ((int)width / 32) + 1;
+        tr->partitionData[model].invariant    = &tr->invariant[lower];
+        tr->partitionData[model].rateCategory = &tr->cdta->rateCategory[lower];
 
-	memset(tr->partitionData[model].gapVector, 0, tr->partitionData[model].initialGapVectorSize);
 
-	for(j = 1; j <= tr->mxtips; j++)
-	  for(i = 0; i < width; i++)
-	    if(tr->partitionData[model].yVector[j][i] == undetermined)
-	      tr->partitionData[model].gapVector[tr->partitionData[model].gapVectorLength * j + i / 32] |= mask32[i % 32];
-      }
+        for(j1 = 1; j1 <= tr->mxtips; j1++)
+            tr->partitionData[model].yVector[j1] = &(tr->yVector[j1][tr->partitionData[model].lower]);
+
+
+        {
+            int width =  tr->partitionData[model].width,
+                    undetermined = getUndetermined(tr->partitionData[model].dataType),
+                    j2;
+
+            tr->partitionData[model].gapVectorLength = ((int)width / 32) + 1;
+
+            memset(tr->partitionData[model].gapVector, 0, tr->partitionData[model].initialGapVectorSize);
+
+            for(j2 = 1; j2 <= tr->mxtips; j2++)
+                for(i = 0; i < width; i++)
+                    if(tr->partitionData[model].yVector[j2][i] == undetermined)
+                        tr->partitionData[model].gapVector[tr->partitionData[model].gapVectorLength * j2 + i / 32] |= mask32[i % 32];
+        }
 
     }
 #else
-  masterBarrier(THREAD_FIX_MODEL_INDICES, tr);
+    masterBarrier(THREAD_FIX_MODEL_INDICES, tr);
 #endif
 
-  
-  if(fixRates)  
-    updatePerSiteRates(tr, TRUE);
+
+    if(fixRates)
+        updatePerSiteRates(tr, TRUE);
 }
 
 void reductionCleanup(tree *tr, int *originalRateCategories, int *originalInvariant)
@@ -250,105 +247,105 @@ void reductionCleanup(tree *tr, int *originalRateCategories, int *originalInvari
   memcpy(tr->dataVector, tr->originalDataVector,  sizeof(int) * tr->cdta->endsite);
 
   memcpy(tr->cdta->rateCategory, originalRateCategories, sizeof(int) * tr->cdta->endsite);
-  memcpy(tr->invariant,          originalInvariant,      sizeof(int) * tr->cdta->endsite);                      
-  
- 
+  memcpy(tr->invariant,          originalInvariant,      sizeof(int) * tr->cdta->endsite);
 
-  memcpy(tr->rdta->y0, tr->rdta->yBUF, ((size_t)tr->rdta->numsp) * ((size_t)tr->cdta->endsite) * sizeof(char));  
-      
+
+
+  memcpy(tr->rdta->y0, tr->rdta->yBUF, ((size_t)tr->rdta->numsp) * ((size_t)tr->cdta->endsite) * sizeof(char));
+
   tr->cdta->endsite = tr->originalCrunchedLength;
-  fixModelIndices(tr, tr->originalCrunchedLength, TRUE);      
+  fixModelIndices(tr, tr->originalCrunchedLength, TRUE);
 }
 
 
 
 
 
-  
+
 
 void computeNextReplicate(tree *tr, int64_t *randomSeed, int *originalRateCategories, int *originalInvariant, boolean isRapid, boolean fixRates, analdef *adef)
-{ 
-  int    
-    j, 
-    model, 
+{
+  int
+    j,
+    model,
     w,
-    *weightBuffer, 
+    *weightBuffer,
     endsite,
-    *weights, 
-    i, 
-    l;  
+    *weights,
+    i,
+    l;
 
   for(j = 0; j < tr->originalCrunchedLength; j++)
     tr->cdta->aliaswgt[j] = 0;
 
-      	  
+
   for(model = 0; model < tr->NumberOfModels; model++)
     {
       int
 	nonzero = 0,
-	pos = 0;        	 
-      
-      for (j = 0; j < tr->originalCrunchedLength; j++)  
+	pos = 0;
+
+      for (j = 0; j < tr->originalCrunchedLength; j++)
 	{
 	  if(tr->originalModel[j] == model)
 	    nonzero += tr->originalWeights[j];
-	}				          
-      
-      weightBuffer = (int *)rax_calloc(nonzero, sizeof(int));	 
-     
+	}
+
+      weightBuffer = (int *)rax_calloc(nonzero, sizeof(int));
+
       for (j = 0; j < nonzero; j++)
-	weightBuffer[(int) (nonzero*randum(randomSeed))]++;                        	      
-      
-      for(j = 0; j < tr->originalCrunchedLength; j++) 
+	weightBuffer[(int) (nonzero*randum(randomSeed))]++;
+
+      for(j = 0; j < tr->originalCrunchedLength; j++)
 	{
 	  if(model == tr->originalModel[j])
 	    {
-	      for(w = 0; w < tr->originalWeights[j]; w++)	  	  	 
+	      for(w = 0; w < tr->originalWeights[j]; w++)
 		{
 		  tr->cdta->aliaswgt[j] += weightBuffer[pos];
-		  pos++;		      
-		}				   
+		  pos++;
+		}
 	    }
-	}  
+	}
 
-      rax_free(weightBuffer);	        
-    }       
+      rax_free(weightBuffer);
+    }
 
   endsite = 0;
-  
-  for (j = 0; j < tr->originalCrunchedLength; j++) 
-    {	      
+
+  for (j = 0; j < tr->originalCrunchedLength; j++)
+    {
       if(tr->cdta->aliaswgt[j] > 0)
-	endsite++;      
-    }          
-  
+	endsite++;
+    }
+
   weights = tr->cdta->aliaswgt;
 
   for(i = 0; i < tr->rdta->numsp; i++)
-    {     
-      unsigned char 
+    {
+      unsigned char
 	*yPos    = &(tr->rdta->y0[((size_t)tr->originalCrunchedLength) * ((size_t)i)]),
 	*origSeq = &(tr->rdta->yBUF[((size_t)tr->originalCrunchedLength) * ((size_t)i)]);
-      
-      for(j = 0, l = 0; j < tr->originalCrunchedLength; j++)      
-	if(tr->cdta->aliaswgt[j] > 0)	  	    
-	  yPos[l++] = origSeq[j];	                   
+
+      for(j = 0, l = 0; j < tr->originalCrunchedLength; j++)
+	if(tr->cdta->aliaswgt[j] > 0)
+	  yPos[l++] = origSeq[j];
     }
 
   for(j = 0, l = 0; j < tr->originalCrunchedLength; j++)
-    {     
-      if(weights[j])	
+    {
+      if(weights[j])
 	{
 	  tr->cdta->aliaswgt[l]     = tr->cdta->aliaswgt[j];
 	  tr->dataVector[l]         = tr->originalDataVector[j];
 	  tr->model[l]              = tr->originalModel[j];
 
 	  if(isRapid)
-	    {	     
+	    {
 	      tr->cdta->rateCategory[l] = originalRateCategories[j];
 	      tr->invariant[l]          = originalInvariant[j];
 	    }
-	  
+
 	  l++;
 	}
     }
@@ -357,15 +354,15 @@ void computeNextReplicate(tree *tr, int64_t *randomSeed, int *originalRateCatego
   fixModelIndices(tr, endsite, fixRates);
 
   if(adef->useWeightFile)
-    { 
+    {
       int
 	count1 = 0,
 	count2 = 0;
-      
-      for(j = 0; j < tr->cdta->endsite; j++)	
-	count1 += tr->cdta->aliaswgt[j];  	  
 
-      for(j = 0; j < tr->originalCrunchedLength; j++)	
+      for(j = 0; j < tr->cdta->endsite; j++)
+	count1 += tr->cdta->aliaswgt[j];
+
+      for(j = 0; j < tr->originalCrunchedLength; j++)
 	count2 += tr->originalWeights[j];
 
       if(count1 != count2)
@@ -376,10 +373,10 @@ void computeNextReplicate(tree *tr, int64_t *randomSeed, int *originalRateCatego
     {
       int
 	count = 0;
-      
+
       for(j = 0; j < tr->cdta->endsite; j++)
-	count += tr->cdta->aliaswgt[j];  
-      
+	count += tr->cdta->aliaswgt[j];
+
       if(count != tr->fullSites)
 	printf("count=%d\ttr->fullSites=%d\n",count, tr->fullSites);
       assert(count == tr->fullSites);
@@ -399,15 +396,15 @@ static pInfo *allocParams(tree *tr)
 
       partBuffer[i].EIGN = (double*)rax_malloc(pl->eignLength * sizeof(double));
       partBuffer[i].EV   = (double*)rax_malloc(pl->evLength * sizeof(double));
-      partBuffer[i].EI   = (double*)rax_malloc(pl->eiLength * sizeof(double));	  
-      partBuffer[i].substRates = (double *)rax_malloc(pl->substRatesLength * sizeof(double));	  
-      partBuffer[i].frequencies =  (double*)rax_malloc(pl->frequenciesLength * sizeof(double));	  
+      partBuffer[i].EI   = (double*)rax_malloc(pl->eiLength * sizeof(double));
+      partBuffer[i].substRates = (double *)rax_malloc(pl->substRatesLength * sizeof(double));
+      partBuffer[i].frequencies =  (double*)rax_malloc(pl->frequenciesLength * sizeof(double));
       partBuffer[i].tipVector   = (double *)rax_malloc(pl->tipVectorLength * sizeof(double));
-      
-     
+
+
     }
 
-  return partBuffer;      
+  return partBuffer;
 }
 
 static void rax_freeParams(int numberOfModels, pInfo *partBuffer)
@@ -416,17 +413,18 @@ static void rax_freeParams(int numberOfModels, pInfo *partBuffer)
 
   for(i = 0; i < numberOfModels; i++)
     {
-      rax_free(partBuffer[i].EIGN); 
-      rax_free(partBuffer[i].EV);   
-      rax_free(partBuffer[i].EI);   
+      rax_free(partBuffer[i].EIGN);
+      rax_free(partBuffer[i].EV);
+      rax_free(partBuffer[i].EI);
       rax_free(partBuffer[i].substRates);
-      rax_free(partBuffer[i].frequencies); 
-      rax_free(partBuffer[i].tipVector);  
+      rax_free(partBuffer[i].frequencies);
+      rax_free(partBuffer[i].tipVector);
     }
-      
+
 }
 
-static void copyParams(int numberOfModels, pInfo *dst, pInfo *src, tree *tr)
+
+static void copyParams(int numberOfModels, pInfo *dst, pInfo *src) // , tree *tr)
 {
   int i;
 
@@ -435,22 +433,22 @@ static void copyParams(int numberOfModels, pInfo *dst, pInfo *src, tree *tr)
   for(i = 0; i < numberOfModels; i++)
     {
       const partitionLengths *pl = getPartitionLengths(&src[i]);
-      
+
       dst[i].dataType = src[i].dataType;
 
        memcpy(dst[i].EIGN,        src[i].EIGN,        pl->eignLength * sizeof(double));
        memcpy(dst[i].EV,          src[i].EV,          pl->evLength * sizeof(double));
-       memcpy(dst[i].EI,          src[i].EI,          pl->eiLength * sizeof(double));	  
-       memcpy(dst[i].substRates,  src[i].substRates,  pl->substRatesLength * sizeof(double));	  
-       memcpy(dst[i].frequencies, src[i].frequencies, pl->frequenciesLength * sizeof(double));	  
+       memcpy(dst[i].EI,          src[i].EI,          pl->eiLength * sizeof(double));
+       memcpy(dst[i].substRates,  src[i].substRates,  pl->substRatesLength * sizeof(double));
+       memcpy(dst[i].frequencies, src[i].frequencies, pl->frequenciesLength * sizeof(double));
        memcpy(dst[i].tipVector,   src[i].tipVector,   pl->tipVectorLength * sizeof(double));
-       
-       
+
+
     }
-  
+
 #ifdef _USE_PTHREADS
   masterBarrier(THREAD_COPY_PARAMS, tr);
-#endif    
+#endif
 }
 
 
@@ -458,12 +456,12 @@ static void copyParams(int numberOfModels, pInfo *dst, pInfo *src, tree *tr)
 
 static void copyFiles(FILE *source, FILE *destination)
 {
-  size_t 
+  size_t
     c;
-  
-  char 
+
+  char
     buf[1024];
-  
+
   assert(processID == 0);
   assert(sizeof(char) == 1);
 
@@ -471,11 +469,11 @@ static void copyFiles(FILE *source, FILE *destination)
     {
       if(ferror(source) != 0)
 	assert(0);
-      
+
       c = fread(buf, sizeof(char), 1024, source);
-      
+
       if(c > 0)
-	fwrite(buf, sizeof(char), c, destination);        
+	fwrite(buf, sizeof(char), c, destination);
     }
 }
 
@@ -484,34 +482,34 @@ static void concatenateBSFiles(int processes, char fileName[1024])
   if(processID == 0)
     {
       int i;
-      
-      FILE 
+
+      FILE
 	*destination = myfopen(fileName, "w"),
 	*source = (FILE*)NULL;
-      
-      char 
-	sourceName[1024];          
-      
+
+      char
+	sourceName[1024];
+
       strcpy(sourceName, fileName);
       strcat(sourceName, ".PID.");
-      
+
       for(i = 0; i < processes; i++)
 	{
-	  char 
+	  char
 	    buf[64],
 	    temporary[1024];
-	  
+
 	  sprintf(buf, "%d", i);
 	  strcpy(temporary, sourceName);
 	  strcat(temporary, buf);
-	  
+
 	  source = myfopen(temporary, "r");
-	  
+
 	  copyFiles(source, destination);
-	  
+
 	  fclose(source);
 	}
-      
+
       fclose(destination);
     }
 }
@@ -520,25 +518,25 @@ static void removeBSFiles(int processes, char fileName[1024])
 {
   if(processID == 0)
     {
-      int 
+      int
 	i;
-      
-      char 
-	sourceName[1024];            
-      
+
+      char
+	sourceName[1024];
+
       strcpy(sourceName, fileName);
       strcat(sourceName, ".PID.");
-      
+
       for(i = 0; i < processes; i++)
 	{
-	  char 
+	  char
 	    buf[64],
 	    temporary[1024];
-	  
+
 	  sprintf(buf, "%d", i);
 	  strcpy(temporary, sourceName);
 	  strcat(temporary, buf);
-	  
+
 	  remove(temporary);
 	}
     }
@@ -547,671 +545,659 @@ static void removeBSFiles(int processes, char fileName[1024])
 #endif
 
 
+#pragma GCC diagnostic ignored "-Wmissing-noreturn"
 void doAllInOne(tree *tr, analdef *adef)
 {
-  int i, n, bestIndex, bootstrapsPerformed;
+    int i, n, bestIndex, bootstrapsPerformed;
 
 #ifdef _WAYNE_MPI
-  int 
-    bootStopTests = 1,
-    j,
-    bootStrapsPerProcess = 0;
-#endif 
+    int
+            bootStopTests = 1,
+            j,
+            bootStrapsPerProcess = 0;
+#endif
 
-  double loopTime; 
-  int      *originalRateCategories;
-  int      *originalInvariant;
+    double loopTime;
+    int      *originalRateCategories;
+    int      *originalInvariant;
 #ifdef _WAYNE_MPI
-  int      slowSearches, fastEvery;
+    int      slowSearches, fastEvery;
 #else
-  int      slowSearches, fastEvery = 5;
+    int      slowSearches, fastEvery = 5;
 #endif
-  int treeVectorLength = -1;
-  topolRELL_LIST *rl;  
-  double bestLH, mlTime, overallTime;  
-  int64_t radiusSeed = adef->rapidBoot;
-  FILE *f;
-  char bestTreeFileName[1024];  
-  hashtable *h = (hashtable*)NULL;
-  unsigned int **bitVectors = (unsigned int**)NULL;
-  boolean bootStopIt = FALSE;
-  double pearsonAverage = 0.0;
-  pInfo *catParams         = allocParams(tr);
-  pInfo *gammaParams = allocParams(tr);
-  unsigned int vLength;
+    int treeVectorLength = -1;
+    topolRELL_LIST *rl;
+    double bestLH, mlTime, overallTime;
+    int64_t radiusSeed = adef->rapidBoot;
+    FILE *f1;
+    char bestTreeFileName[1024];
+    hashtable *h = (hashtable*)NULL;
+    unsigned int **bitVectors = (unsigned int**)NULL;
+    boolean bootStopIt = FALSE;
+    double pearsonAverage = 0.0;
+    pInfo *catParams         = allocParams(tr);
+    pInfo *gammaParams = allocParams(tr);
+    unsigned int vLength = 0;
 
-  n = adef->multipleRuns; 
+    n = adef->multipleRuns;
 
 #ifdef _WAYNE_MPI
-  if(n % processes != 0)
-    n = processes * ((n / processes) + 1);
+    if(n % processes != 0)
+        n = processes * ((n / processes) + 1);
 #endif
 
-  if(adef->bootStopping)
-    {    
-      h = initHashTable(tr->mxtips * 100);
-
-      treeVectorLength = adef->multipleRuns;
-      
-      bitVectors = initBitVector(tr, &vLength);          
-    }
-
-  rl = (topolRELL_LIST *)rax_malloc(sizeof(topolRELL_LIST));
-  initTL(rl, tr, n);
-     
-  originalRateCategories = (int*)rax_malloc(tr->cdta->endsite * sizeof(int));      
-  originalInvariant      = (int*)rax_malloc(tr->cdta->endsite * sizeof(int));
-
-             
-
-  initModel(tr, tr->rdta, tr->cdta, adef);
-
-  if(adef->grouping)
-    printBothOpen("\n\nThe topologies of all Bootstrap and ML trees will adhere to the constraint tree specified in %s\n", tree_file);
-  if(adef->constraint)
-    printBothOpen("\n\nThe topologies of all Bootstrap and ML trees will adhere to the bifurcating backbone constraint tree specified in %s\n", tree_file);
- 
-
-#ifdef _WAYNE_MPI
-  int64_t parsimonySeed0 = adef->parsimonySeed;
-  int64_t replicateSeed0 = adef->rapidBoot;
-  n = n / processes;
-#endif
- 
-  for(i = 0; i < n && !bootStopIt; i++)
-    {  
-#ifdef _WAYNE_MPI
-      j = i + n * processID;
-      tr->treeID = j;
-#else              
-      tr->treeID = i;
-#endif
-
-      tr->checkPointCounter = 0;
-        
-      loopTime = gettime();  
-
-#ifdef _WAYNE_MPI
-      if(i == 0)
-        {
-          if(parsimonySeed0 != 0)
-            adef->parsimonySeed = parsimonySeed0 + 10000 * processID;
-          adef->rapidBoot = replicateSeed0 + 10000 * processID;
-          radiusSeed = adef->rapidBoot;
-        }
-#endif          
-     
-      if(i % 10 == 0)
-	{
-	  if(i > 0)	    	    
-	    reductionCleanup(tr, originalRateCategories, originalInvariant);	    	  
-
-	  if(adef->grouping || adef->constraint)
-	    {
-	      FILE *f = myfopen(tree_file, "rb");	
-
-	      assert(adef->restart);
-	      if(adef->grouping)
-		{
-		  if (! treeReadLenMULT(f, tr, adef))
-		    exit(-1);
-		}
-	      else
-		{
-		  if(tr->saveMemory)				 
-		    treeReadLen(f, tr, FALSE, FALSE, TRUE, adef, FALSE, FALSE);	          	       
-		  else		   
-		    treeReadLen(f, tr, FALSE, FALSE, FALSE, adef, FALSE, FALSE);
-		}
-	     
-	      fclose(f);
-	    }
-	  else
-	    makeParsimonyTree(tr, adef);
-	  
-	  tr->likelihood = unlikely;
-	  if(i == 0)
-	    {
-	      double t;
-	          
-	      onlyInitrav(tr, tr->start);
-	      treeEvaluate(tr, 1);	     	
-	     	      
-	      t = gettime();    	      
-
-	      modOpt(tr, adef, FALSE, 5.0);	    
-#ifdef _WAYNE_MPI
-	      printBothOpen("\nTime for BS model parameter optimization on Process %d: %f seconds\n", processID, gettime() - t);	     
-#else
-	      printBothOpen("\nTime for BS model parameter optimization %f\n", gettime() - t);
-#endif
-	      
-	      memcpy(originalRateCategories, tr->cdta->rateCategory, sizeof(int) * tr->cdta->endsite);
-	      memcpy(originalInvariant,      tr->invariant,          sizeof(int) * tr->cdta->endsite);
-
-	      if(adef->bootstrapBranchLengths)
-		{
-		  if(tr->rateHetModel == CAT)
-		    {
-		      copyParams(tr->NumberOfModels, catParams, tr->partitionData, tr);		      
-		      assert(tr->cdta->endsite == tr->originalCrunchedLength);		 
-		      catToGamma(tr, adef);		      
-		      modOpt(tr, adef, TRUE, adef->likelihoodEpsilon);
-		      copyParams(tr->NumberOfModels, gammaParams, tr->partitionData, tr);		      
-		      gammaToCat(tr);
-		      copyParams(tr->NumberOfModels, tr->partitionData, catParams, tr);		      
-		    }
-		  else
-		    {		  
-		      assert(tr->cdta->endsite == tr->originalCrunchedLength);		 		     		     		      		     
-		    }
-		}
-	    }	  	  
-	}
-
-      computeNextReplicate(tr, &adef->rapidBoot, originalRateCategories, originalInvariant, TRUE, TRUE, adef); 
-      resetBranches(tr);
-
-     
-
-      evaluateGenericInitrav(tr, tr->start);
-    
-      treeEvaluate(tr, 1);    	             
-     
-      computeBOOTRAPID(tr, adef, &radiusSeed);  
-#ifdef _WAYNE_MPI
-      saveTL(rl, tr, j);
-#else                      	  
-      saveTL(rl, tr, i);
-#endif
-
-      if(adef->bootstrapBranchLengths)
-	{
-	  double 
-	    lh = tr->likelihood;
-	  	 
-	  if(tr->rateHetModel == CAT)
-	    {
-	      copyParams(tr->NumberOfModels, tr->partitionData, gammaParams, tr);	      
-	     
-	      catToGamma(tr, adef);
-	      
-	      
-	      resetBranches(tr);
-	      onlyInitrav(tr, tr->start);
-	      treeEvaluate(tr, 2.0);
-	  
-	     
-	      gammaToCat(tr);
-	     
-	
-	      copyParams(tr->NumberOfModels, tr->partitionData, catParams, tr);	      
-	      tr->likelihood = lh;
-	    }
-	  else
-	    {	     
-	      treeEvaluate(tr, 2.0);
-	      tr->likelihood = lh;
-	    }
-	}
-      
-      printBootstrapResult(tr, adef, TRUE); 
-
-      loopTime = gettime() - loopTime; 
-      writeInfoFile(adef, tr, loopTime); 
-     
-      if(adef->bootStopping)
-#ifdef _WAYNE_MPI
-	{
-	  int 
-	    nn = (i + 1) * processes;
-
-	  if((nn > START_BSTOP_TEST) && 
-	     (i * processes < FC_SPACING * bootStopTests) &&
-	     ((i + 1) * processes >= FC_SPACING * bootStopTests)
-	     )	     
-	    {
-	      MPI_Barrier(MPI_COMM_WORLD);
-	                    
-	      concatenateBSFiles(processes, bootstrapFileName);                
-	      
-              MPI_Barrier(MPI_COMM_WORLD);	      
-	      
-	      bootStopIt = computeBootStopMPI(tr, bootstrapFileName, adef, &pearsonAverage);
-	      bootStopTests++;
-	    }
-	}	
-#else	
-      bootStopIt = bootStop(tr, h, i, &pearsonAverage, bitVectors, treeVectorLength, vLength, adef);
-#endif
-
-
-    }  
- 
-#ifdef _WAYNE_MPI      
-  MPI_Barrier(MPI_COMM_WORLD);
-  
-  bootstrapsPerformed = i * processes; 
-  bootStrapsPerProcess = i;   
-      
-  concatenateBSFiles(processes, bootstrapFileName);
-  removeBSFiles(processes, bootstrapFileName);  
-  
-  MPI_Barrier(MPI_COMM_WORLD); 
-#else
-  bootstrapsPerformed = i;
-#endif
-
-  rax_freeParams(tr->NumberOfModels, catParams);
-  rax_free(catParams);
-
-  rax_freeParams(tr->NumberOfModels, gammaParams);
-  rax_free(gammaParams);
-
-  if(adef->bootStopping)
-    {
-      freeBitVectors(bitVectors, 2 * tr->mxtips);
-      rax_free(bitVectors);
-      freeHashTable(h);
-      rax_free(h);      
-    }
-
- 
-  {      
-    double t;
-
-    printBothOpenMPI("\n\n");
-    
     if(adef->bootStopping)
-      {
-	if(bootStopIt)
-	  {
-	    switch(tr->bootStopCriterion)
-	      {
-	      case FREQUENCY_STOP:
-		printBothOpenMPI("Stopped Rapid BS search after %d replicates with FC Bootstopping criterion\n", bootstrapsPerformed);
-		printBothOpenMPI("Pearson Average of %d random splits: %f\n",adef->bootstopPermutations , pearsonAverage);	      
-		break;
-	      case MR_STOP:
-		printBothOpenMPI("Stopped Rapid BS search after %d replicates with MR-based Bootstopping criterion\n", bootstrapsPerformed);
-		printBothOpenMPI("WRF Average of %d random splits: %f %%\n", adef->bootstopPermutations, pearsonAverage);	     
-		break;
-	      case MRE_STOP:
-		printBothOpenMPI("Stopped Rapid BS search after %d replicates with MRE-based Bootstopping criterion\n", bootstrapsPerformed);
-		printBothOpenMPI("WRF Average of %d random splits: %f %%\n", adef->bootstopPermutations, pearsonAverage);	     
-		break;
-	      case MRE_IGN_STOP:
-		printBothOpenMPI("Stopped Rapid BS search after %d replicates with MRE_IGN-based Bootstopping criterion\n", bootstrapsPerformed);
-		printBothOpenMPI("WRF Average of %d random splits: %f %%\n", adef->bootstopPermutations, pearsonAverage);	     
-		break;
-	      default:
-		assert(0);
-	      }
-	  }
-	else
-	  { 
-	    switch(tr->bootStopCriterion)	     
-	      {
-	      case FREQUENCY_STOP:
-		printBothOpenMPI("Rapid BS search did not converge after %d replicates with FC Bootstopping criterion\n", bootstrapsPerformed);
-		printBothOpenMPI("Pearson Average of %d random splits: %f\n",adef->bootstopPermutations , pearsonAverage);
-		break;
-	      case MR_STOP:
-		printBothOpenMPI("Rapid BS search did not converge after %d replicates with MR-based Bootstopping criterion\n", bootstrapsPerformed);
-		printBothOpenMPI("WRF Average of %d random splits: %f %%\n", adef->bootstopPermutations, pearsonAverage);
-		break;
-	      case MRE_STOP:
-		printBothOpenMPI("Rapid BS search did not converge after %d replicates with MRE-based Bootstopping criterion\n", bootstrapsPerformed);
-		printBothOpenMPI("WRF Average of %d random splits: %f %%\n", adef->bootstopPermutations, pearsonAverage);
-		break;
-	      case MRE_IGN_STOP:
-		printBothOpenMPI("Rapid BS search did not converge after %d replicates with MR_IGN-based Bootstopping criterion\n", bootstrapsPerformed);
-		printBothOpenMPI("WRF Average of %d random splits: %f %%\n", adef->bootstopPermutations, pearsonAverage);
-		break;
-	      default:
-		assert(0);
-	      }
-	  }
-      }
-    
-
-    t = gettime() - masterTime;
-
-    printBothOpenMPI("Overall Time for %d Rapid Bootstraps %f seconds\n", bootstrapsPerformed, t);     
-    printBothOpenMPI("Average Time per Rapid Bootstrap %f seconds\n", (double)(t/((double)bootstrapsPerformed)));  
-        
-    if(!adef->allInOne)     
-      {
-	printBothOpenMPI("All %d bootstrapped trees written to: %s\n", bootstrapsPerformed, bootstrapFileName);
-
-#ifdef _WAYNE_MPI      	 
-	MPI_Finalize();
-#endif
-	exit(0);
-      }
-  }
- 
-  
-  /* ML-search */ 
-
-  mlTime = gettime();
-  double t = mlTime;
-  
-  printBothOpenMPI("\nStarting ML Search ...\n\n"); 
-
-  /***CLEAN UP reduction stuff */  
-
-  reductionCleanup(tr, originalRateCategories, originalInvariant);  
-
-  /****/     	   
-  
-#ifdef _WAYNE_MPI 
-  restoreTL(rl, tr, n * processID); 
-#else
-  restoreTL(rl, tr, 0);
-#endif
-
-  resetBranches(tr);
-
-  
-
-  evaluateGenericInitrav(tr, tr->start);   
-
-  
-
-  modOpt(tr, adef, TRUE, adef->likelihoodEpsilon);  
-
-#ifdef _WAYNE_MPI
-  
-  if(bootstrapsPerformed <= 100)
-    fastEvery = 5;
-  else
-    fastEvery = bootstrapsPerformed / 20;
-
-  for(i = 0; i < bootstrapsPerformed; i++)
-    rl->t[i]->likelihood = unlikely;
-
-  for(i = 0; i < bootStrapsPerProcess; i++)
-    {            
-      j = i + n * processID;
-    
-      if(i % fastEvery == 0)
-	{	 
-	  restoreTL(rl, tr, j); 	 	    	   	
-	  
-	  resetBranches(tr);	 
-
-	  evaluateGenericInitrav(tr, tr->start);
-	  	  
-	  treeEvaluate(tr, 1); 		 
-	  	  
-	  optimizeRAPID(tr, adef);	  			         	  
-	  
-	  saveTL(rl, tr, j);  
-	}    
-    }     
-#else
-  for(i = 0; i < bootstrapsPerformed; i++)
-    {            
-      rl->t[i]->likelihood = unlikely;
-    
-      if(i % fastEvery == 0)
-	{
-	 
-	  
-	  restoreTL(rl, tr, i); 	 	    	   	
-	  
-	  resetBranches(tr);	 
-
-	  evaluateGenericInitrav(tr, tr->start);
-	  	  
-	  treeEvaluate(tr, 1); 		 
-	  	  
-	  optimizeRAPID(tr, adef);	  			         	  
-	  
-	 
-
-	  saveTL(rl, tr, i); 	 
-	}    
-    }     
-#endif
- 
-  printBothOpenMPI("Fast ML optimization finished\n\n"); 
-  t = gettime() - t;
-  
-#ifdef _WAYNE_MPI
-  printBothOpen("Fast ML search on Process %d: Time %f seconds\n\n", processID, t);
-  j = n * processID;
-
-  qsort(&(rl->t[j]), n, sizeof(topolRELL*), compareTopolRell);
-
-  restoreTL(rl, tr, j);
-#else
-  printBothOpen("Fast ML search Time: %f seconds\n\n", t);
-  qsort(&(rl->t[0]), bootstrapsPerformed, sizeof(topolRELL*), compareTopolRell);
-       
-  restoreTL(rl, tr, 0);
-#endif
-  t = gettime();
-  
-  resetBranches(tr);
-
-  evaluateGenericInitrav(tr, tr->start);
-
-  modOpt(tr, adef, TRUE, adef->likelihoodEpsilon);     
-  
-  slowSearches = bootstrapsPerformed / 5;
-  if(bootstrapsPerformed % 5 != 0)
-    slowSearches++;
-
-  slowSearches  = MIN(slowSearches, 10); 
-
-#ifdef _WAYNE_MPI
-   if(processes > 1)
     {
-      if(slowSearches % processes == 0)
-        slowSearches = slowSearches / processes;
-      else
-        slowSearches = (slowSearches / processes) + 1;
-    }
-   
-   for(i = 0; i < slowSearches; i++)
-    {           
-      j = i + n * processID;
-      restoreTL(rl, tr, j);     
-      rl->t[j]->likelihood = unlikely;  
-      
-      evaluateGenericInitrav(tr, tr->start);
+        h = initHashTable(tr->mxtips * 100);
 
-      treeEvaluate(tr, 1.0);   
-      
-      thoroughOptimization(tr, adef, rl, j); 
-   }   
-#else
-  for(i = 0; i < slowSearches; i++)
-    {           
-      restoreTL(rl, tr, i);     
-      rl->t[i]->likelihood = unlikely;  
-      
-      evaluateGenericInitrav(tr, tr->start);
+        treeVectorLength = adef->multipleRuns;
 
-      treeEvaluate(tr, 1.0);   
-      
-      thoroughOptimization(tr, adef, rl, i); 	 
-
-   }
-#endif
-  
-  
-
-  /*************************************************************************************************************/  
-  
-  if(tr->rateHetModel == CAT) 
-    {      
-      catToGamma(tr, adef);    
-      modOpt(tr, adef, TRUE, adef->likelihoodEpsilon); 
+        bitVectors = initBitVector(tr, &vLength);
     }
 
-  bestIndex = -1;
-  bestLH = unlikely;
-    
-#ifdef _WAYNE_MPI
-  for(i = 0; i < slowSearches; i++)
-    { 
-      j = i + n * processID;
-      restoreTL(rl, tr, j);
-      resetBranches(tr);
+    rl = (topolRELL_LIST *)rax_malloc(sizeof(topolRELL_LIST));
+    initTL(rl, tr, n);
 
-      evaluateGenericInitrav(tr, tr->start);
+    originalRateCategories = (int*)rax_malloc(tr->cdta->endsite * sizeof(int));
+    originalInvariant      = (int*)rax_malloc(tr->cdta->endsite * sizeof(int));
 
-      treeEvaluate(tr, 2);
-      
-      printBothOpen("Slow ML Search %d Likelihood: %f\n", j, tr->likelihood);
-      
-      if(tr->likelihood > bestLH)
-	{
-	  bestLH = tr->likelihood;
-	  bestIndex = j;
-	}
-    }
-  /*printf("processID = %d, bestIndex = %d; bestLH = %f\n", processID, bestIndex, bestLH);*/
-#else
-  for(i = 0; i < slowSearches; i++)
-    { 
-      restoreTL(rl, tr, i);
-      resetBranches(tr);
 
-      evaluateGenericInitrav(tr, tr->start);
 
-      treeEvaluate(tr, 2);
-      
-      printBothOpen("Slow ML Search %d Likelihood: %f\n", i, tr->likelihood);
-      
-      if(tr->likelihood > bestLH)
-	{
-	  bestLH = tr->likelihood;
-	  bestIndex = i;
-	}
-    }
-#endif
-  
-  printBothOpenMPI("Slow ML optimization finished\n\n");
+    initModel(tr, tr->rdta, tr->cdta, adef);
 
-  t = gettime() - t;
+    if(adef->grouping)
+        printBothOpen("\n\nThe topologies of all Bootstrap and ML trees will adhere to the constraint tree specified in %s\n", tree_file);
+    if(adef->constraint)
+        printBothOpen("\n\nThe topologies of all Bootstrap and ML trees will adhere to the bifurcating backbone constraint tree specified in %s\n", tree_file);
+
 
 #ifdef _WAYNE_MPI
-  printBothOpen("Slow ML search on Process %d: Time %f seconds\n", processID, t);
-#else
-  printBothOpen("Slow ML search Time: %f seconds\n", t);
-#endif
-  
-  t = gettime();
-  
-  restoreTL(rl, tr, bestIndex);
-  resetBranches(tr);
-
-  evaluateGenericInitrav(tr, tr->start);
- 
-  treeEvaluate(tr, 2); 
-         
-  Thorough = 1;
-  tr->doCutoff = FALSE;  
-	 
-  treeOptimizeThorough(tr, 1, 10);
-  evaluateGenericInitrav(tr, tr->start);
-  
-  modOpt(tr, adef, TRUE, adef->likelihoodEpsilon);
-  t = gettime() - t;
-
-#ifdef _WAYNE_MPI
-  printBothOpen("Thorough ML search on Process %d: Time %f seconds\n", processID, t);
-#else
-  printBothOpen("Thorough ML search Time: %f seconds\n", t);
+    int64_t parsimonySeed0 = adef->parsimonySeed;
+    int64_t replicateSeed0 = adef->rapidBoot;
+    n = n / processes;
 #endif
 
-#ifdef _WAYNE_MPI
-  bestLH = tr->likelihood;
-
-  printf("\nprocessID = %d, bestLH = %f\n", processID,  bestLH);
-
-  if(processes > 1)
+    for(i = 0; i < n && !bootStopIt; i++)
     {
-      double *buffer;
-      int bestProcess;
+#ifdef _WAYNE_MPI
+        j = i + n * processID;
+        tr->treeID = j;
+#else
+        tr->treeID = i;
+#endif
 
-      buffer = (double *)rax_malloc(sizeof(double) * processes);
-      for(i = 0; i < processes; i++)
-        buffer[i] = unlikely;
-      buffer[processID] = bestLH;
-      for(i = 0; i < processes; i++)
-        MPI_Bcast(&buffer[i], 1, MPI_DOUBLE, i, MPI_COMM_WORLD);
-      bestLH = buffer[0];
-      bestProcess = 0;
-      for(i = 1; i < processes; i++)
-        if(buffer[i] > bestLH)
-          {
-             bestLH = buffer[i];
-             bestProcess = i;
-          }
-      rax_free(buffer);
+        tr->checkPointCounter = 0;
 
-      if(processID != bestProcess)
+        loopTime = gettime();
+
+#ifdef _WAYNE_MPI
+        if(i == 0)
         {
-          MPI_Finalize();
-          exit(0);
+            if(parsimonySeed0 != 0)
+                adef->parsimonySeed = parsimonySeed0 + 10000 * processID;
+            adef->rapidBoot = replicateSeed0 + 10000 * processID;
+            radiusSeed = adef->rapidBoot;
+        }
+#endif
+
+        if(i % 10 == 0)
+        {
+            if(i > 0)
+                reductionCleanup(tr, originalRateCategories, originalInvariant);
+
+            if(adef->grouping || adef->constraint)
+            {
+                FILE *f = myfopen(tree_file, "rb");
+
+                assert(adef->restart);
+                if(adef->grouping)
+                {
+                    if (! treeReadLenMULT(f, tr, adef))
+                        exit(-1);
+                }
+                else
+                {
+                    if(tr->saveMemory)
+                        treeReadLen(f, tr, FALSE, FALSE, TRUE, adef, FALSE, FALSE);
+                    else
+                        treeReadLen(f, tr, FALSE, FALSE, FALSE, adef, FALSE, FALSE);
+                }
+
+                fclose(f);
+            }
+            else
+                makeParsimonyTree(tr, adef);
+
+            tr->likelihood = unlikely;
+            if(i == 0)
+            {
+                double t;
+
+                onlyInitrav(tr, tr->start);
+                treeEvaluate(tr, 1);
+
+                t = gettime();
+
+                modOpt(tr, adef, FALSE, 5.0);
+#ifdef _WAYNE_MPI
+                printBothOpen("\nTime for BS model parameter optimization on Process %d: %f seconds\n", processID, gettime() - t);
+#else
+                printBothOpen("\nTime for BS model parameter optimization %f\n", gettime() - t);
+#endif
+
+                memcpy(originalRateCategories, tr->cdta->rateCategory, sizeof(int) * tr->cdta->endsite);
+                memcpy(originalInvariant,      tr->invariant,          sizeof(int) * tr->cdta->endsite);
+
+                if(adef->bootstrapBranchLengths)
+                {
+                    if(tr->rateHetModel == CAT) {
+                        copyParams(tr->NumberOfModels, catParams, tr->partitionData /*, tr */);
+                        assert(tr->cdta->endsite == tr->originalCrunchedLength);
+                        catToGamma(tr, adef);
+                        modOpt(tr, adef, TRUE, adef->likelihoodEpsilon);
+                        copyParams(tr->NumberOfModels, gammaParams, tr->partitionData /*, tr */);
+                        gammaToCat(tr);
+                        copyParams(tr->NumberOfModels, tr->partitionData, catParams /*, tr */);
+                    }
+                    else
+                    {
+                        assert(tr->cdta->endsite == tr->originalCrunchedLength);
+                    }
+                }
+            }
+        }
+
+        computeNextReplicate(tr, &adef->rapidBoot, originalRateCategories, originalInvariant, TRUE, TRUE, adef);
+        resetBranches(tr);
+
+
+
+        evaluateGenericInitrav(tr, tr->start);
+
+        treeEvaluate(tr, 1);
+
+        computeBOOTRAPID(tr, adef, &radiusSeed);
+#ifdef _WAYNE_MPI
+        saveTL(rl, tr, j);
+#else
+        saveTL(rl, tr, i);
+#endif
+
+        if(adef->bootstrapBranchLengths) {
+            const double lh = tr->likelihood;
+            if(tr->rateHetModel == CAT) {
+                copyParams(tr->NumberOfModels, tr->partitionData, gammaParams /*, tr */);
+                catToGamma(tr, adef);
+                resetBranches(tr);
+                onlyInitrav(tr, tr->start);
+                treeEvaluate(tr, 2.0);
+                gammaToCat(tr);
+                copyParams(tr->NumberOfModels, tr->partitionData, catParams /*, tr */);
+                tr->likelihood = lh;
+            }
+            else {
+                treeEvaluate(tr, 2.0);
+                tr->likelihood = lh;
+            }
+        }
+
+        printBootstrapResult(tr, adef, TRUE);
+
+        loopTime = gettime() - loopTime;
+        writeInfoFile(adef, tr, loopTime);
+
+        if(adef->bootStopping)
+#ifdef _WAYNE_MPI
+        {
+            int
+                    nn = (i + 1) * processes;
+
+            if((nn > START_BSTOP_TEST) &&
+               (i * processes < FC_SPACING * bootStopTests) &&
+               ((i + 1) * processes >= FC_SPACING * bootStopTests)
+               )
+            {
+                MPI_Barrier(MPI_COMM_WORLD);
+
+                concatenateBSFiles(processes, bootstrapFileName);
+
+                MPI_Barrier(MPI_COMM_WORLD);
+
+                bootStopIt = computeBootStopMPI(tr, bootstrapFileName, adef, &pearsonAverage);
+                bootStopTests++;
+            }
+        }
+#else
+        bootStopIt = bootStop(tr, h, i, &pearsonAverage, bitVectors, treeVectorLength, vLength, adef);
+#endif
+
+
+    }
+
+#ifdef _WAYNE_MPI
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    bootstrapsPerformed = i * processes;
+    bootStrapsPerProcess = i;
+
+    concatenateBSFiles(processes, bootstrapFileName);
+    removeBSFiles(processes, bootstrapFileName);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+#else
+    bootstrapsPerformed = i;
+#endif
+
+    rax_freeParams(tr->NumberOfModels, catParams);
+    rax_free(catParams);
+
+    rax_freeParams(tr->NumberOfModels, gammaParams);
+    rax_free(gammaParams);
+
+    if(adef->bootStopping)
+    {
+        freeBitVectors(bitVectors, 2 * tr->mxtips);
+        rax_free(bitVectors);
+        freeHashTable(h);
+        rax_free(h);
+    }
+
+
+    {
+        double t;
+
+        printBothOpenMPI("\n\n");
+
+        if(adef->bootStopping)
+        {
+            if(bootStopIt)
+            {
+                switch(tr->bootStopCriterion)
+                {
+                  case FREQUENCY_STOP:
+                      printBothOpenMPI("Stopped Rapid BS search after %d replicates with FC Bootstopping criterion\n", bootstrapsPerformed);
+                      printBothOpenMPI("Pearson Average of %d random splits: %f\n",adef->bootstopPermutations , pearsonAverage);
+                      break;
+                  case MR_STOP:
+                      printBothOpenMPI("Stopped Rapid BS search after %d replicates with MR-based Bootstopping criterion\n", bootstrapsPerformed);
+                      printBothOpenMPI("WRF Average of %d random splits: %f %%\n", adef->bootstopPermutations, pearsonAverage);
+                      break;
+                  case MRE_STOP:
+                      printBothOpenMPI("Stopped Rapid BS search after %d replicates with MRE-based Bootstopping criterion\n", bootstrapsPerformed);
+                      printBothOpenMPI("WRF Average of %d random splits: %f %%\n", adef->bootstopPermutations, pearsonAverage);
+                      break;
+                  case MRE_IGN_STOP:
+                      printBothOpenMPI("Stopped Rapid BS search after %d replicates with MRE_IGN-based Bootstopping criterion\n", bootstrapsPerformed);
+                      printBothOpenMPI("WRF Average of %d random splits: %f %%\n", adef->bootstopPermutations, pearsonAverage);
+                      break;
+                  default:
+                      assert(0);
+                }
+            }
+            else
+            {
+                switch(tr->bootStopCriterion)
+                {
+                  case FREQUENCY_STOP:
+                      printBothOpenMPI("Rapid BS search did not converge after %d replicates with FC Bootstopping criterion\n", bootstrapsPerformed);
+                      printBothOpenMPI("Pearson Average of %d random splits: %f\n",adef->bootstopPermutations , pearsonAverage);
+                      break;
+                  case MR_STOP:
+                      printBothOpenMPI("Rapid BS search did not converge after %d replicates with MR-based Bootstopping criterion\n", bootstrapsPerformed);
+                      printBothOpenMPI("WRF Average of %d random splits: %f %%\n", adef->bootstopPermutations, pearsonAverage);
+                      break;
+                  case MRE_STOP:
+                      printBothOpenMPI("Rapid BS search did not converge after %d replicates with MRE-based Bootstopping criterion\n", bootstrapsPerformed);
+                      printBothOpenMPI("WRF Average of %d random splits: %f %%\n", adef->bootstopPermutations, pearsonAverage);
+                      break;
+                  case MRE_IGN_STOP:
+                      printBothOpenMPI("Rapid BS search did not converge after %d replicates with MR_IGN-based Bootstopping criterion\n", bootstrapsPerformed);
+                      printBothOpenMPI("WRF Average of %d random splits: %f %%\n", adef->bootstopPermutations, pearsonAverage);
+                      break;
+                  default:
+                      assert(0);
+                }
+            }
+        }
+
+
+        t = gettime() - masterTime;
+
+        printBothOpenMPI("Overall Time for %d Rapid Bootstraps %f seconds\n", bootstrapsPerformed, t);
+        printBothOpenMPI("Average Time per Rapid Bootstrap %f seconds\n", (double)(t/((double)bootstrapsPerformed)));
+
+        if(!adef->allInOne)
+        {
+            printBothOpenMPI("All %d bootstrapped trees written to: %s\n", bootstrapsPerformed, bootstrapFileName);
+
+#ifdef _WAYNE_MPI
+            MPI_Finalize();
+#endif
+            exit(0);
+        }
+    }
+
+
+    /* ML-search */
+
+    mlTime = gettime();
+    double t = mlTime;
+
+    printBothOpenMPI("\nStarting ML Search ...\n\n");
+
+    /***CLEAN UP reduction stuff */
+
+    reductionCleanup(tr, originalRateCategories, originalInvariant);
+
+    /****/
+
+#ifdef _WAYNE_MPI
+    restoreTL(rl, tr, n * processID);
+#else
+    restoreTL(rl, tr, 0);
+#endif
+
+    resetBranches(tr);
+
+
+
+    evaluateGenericInitrav(tr, tr->start);
+
+
+
+    modOpt(tr, adef, TRUE, adef->likelihoodEpsilon);
+
+#ifdef _WAYNE_MPI
+
+    if(bootstrapsPerformed <= 100)
+        fastEvery = 5;
+    else
+        fastEvery = bootstrapsPerformed / 20;
+
+    for(i = 0; i < bootstrapsPerformed; i++)
+        rl->t[i]->likelihood = unlikely;
+
+    for(i = 0; i < bootStrapsPerProcess; i++)
+    {
+        j = i + n * processID;
+
+        if(i % fastEvery == 0)
+        {
+            restoreTL(rl, tr, j);
+
+            resetBranches(tr);
+
+            evaluateGenericInitrav(tr, tr->start);
+
+            treeEvaluate(tr, 1);
+
+            optimizeRAPID(tr, adef);
+
+            saveTL(rl, tr, j);
+        }
+    }
+#else
+    for(i = 0; i < bootstrapsPerformed; i++)
+    {
+        rl->t[i]->likelihood = unlikely;
+
+        if(i % fastEvery == 0)
+        {
+
+
+            restoreTL(rl, tr, i);
+
+            resetBranches(tr);
+
+            evaluateGenericInitrav(tr, tr->start);
+
+            treeEvaluate(tr, 1);
+
+            optimizeRAPID(tr, adef);
+
+
+
+            saveTL(rl, tr, i);
         }
     }
 #endif
 
-  printBothOpen("\nFinal ML Optimization Likelihood: %f\n", tr->likelihood);   
-  printBothOpen("\nModel Information:\n\n");
-  
-  printModelParams(tr, adef);    
-  
-  strcpy(bestTreeFileName, workdir); 
-  strcat(bestTreeFileName, "RAxML_bestTree.");
-  strcat(bestTreeFileName,         run_id);
-   
-  Tree2String(tr->tree_string, tr, tr->start->back, TRUE, TRUE, FALSE, FALSE, TRUE, adef, SUMMARIZE_LH, FALSE, FALSE, FALSE, FALSE);
-  f = myfopen(bestTreeFileName, "wb");
-  fprintf(f, "%s", tr->tree_string);
-  fclose(f);
-
-  if(adef->perGeneBranchLengths)
-    printTreePerGene(tr, adef, bestTreeFileName, "w");
-
-  
-  overallTime = gettime() - masterTime;
-  mlTime    = gettime() - mlTime;
-
-  printBothOpen("\nML search took %f secs or %f hours\n", mlTime, mlTime / 3600.0); 
-  printBothOpen("\nCombined Bootstrap and ML search took %f secs or %f hours\n", overallTime, overallTime / 3600.0);   
-  printBothOpen("\nDrawing Bootstrap Support Values on best-scoring ML tree ...\n\n");
-      
-  
-  freeTL(rl);   
-  rax_free(rl);       
-  
-  calcBipartitions(tr, adef, bestTreeFileName, bootstrapFileName);    
-  
-
-  overallTime = gettime() - masterTime;
-
-  printBothOpen("Program execution info written to %s\n", infoFileName);
-  printBothOpen("All %d bootstrapped trees written to: %s\n\n", bootstrapsPerformed, bootstrapFileName);
-  printBothOpen("Best-scoring ML tree written to: %s\n\n", bestTreeFileName);
-  if(adef->perGeneBranchLengths && tr->NumberOfModels > 1)    
-    printBothOpen("Per-Partition branch lengths of best-scoring ML tree written to %s.PARTITION.0 to  %s.PARTITION.%d\n\n", bestTreeFileName,  bestTreeFileName, 
-		  tr->NumberOfModels - 1);    
-  printBothOpen("Best-scoring ML tree with support values written to: %s\n\n", bipartitionsFileName);
-  printBothOpen("Best-scoring ML tree with support values as branch labels written to: %s\n\n", bipartitionsFileNameBranchLabels);
-  printBothOpen("Overall execution time for full ML analysis: %f secs or %f hours or %f days\n\n", overallTime, overallTime/3600.0, overallTime/86400.0);
+    printBothOpenMPI("Fast ML optimization finished\n\n");
+    t = gettime() - t;
 
 #ifdef _WAYNE_MPI
-  MPI_Finalize();
-#endif      
+    printBothOpen("Fast ML search on Process %d: Time %f seconds\n\n", processID, t);
+    j = n * processID;
 
-  exit(0); 
+    qsort(&(rl->t[j]), n, sizeof(topolRELL*), compareTopolRell);
+
+    restoreTL(rl, tr, j);
+#else
+    printBothOpen("Fast ML search Time: %f seconds\n\n", t);
+    qsort(&(rl->t[0]), bootstrapsPerformed, sizeof(topolRELL*), compareTopolRell);
+
+    restoreTL(rl, tr, 0);
+#endif
+    t = gettime();
+
+    resetBranches(tr);
+
+    evaluateGenericInitrav(tr, tr->start);
+
+    modOpt(tr, adef, TRUE, adef->likelihoodEpsilon);
+
+    slowSearches = bootstrapsPerformed / 5;
+    if(bootstrapsPerformed % 5 != 0)
+        slowSearches++;
+
+    slowSearches  = MIN(slowSearches, 10);
+
+#ifdef _WAYNE_MPI
+    if(processes > 1)
+    {
+        if(slowSearches % processes == 0)
+            slowSearches = slowSearches / processes;
+        else
+            slowSearches = (slowSearches / processes) + 1;
+    }
+
+    for(i = 0; i < slowSearches; i++)
+    {
+        j = i + n * processID;
+        restoreTL(rl, tr, j);
+        rl->t[j]->likelihood = unlikely;
+
+        evaluateGenericInitrav(tr, tr->start);
+
+        treeEvaluate(tr, 1.0);
+
+        thoroughOptimization(tr, adef, rl, j);
+    }
+#else
+    for(i = 0; i < slowSearches; i++)
+    {
+        restoreTL(rl, tr, i);
+        rl->t[i]->likelihood = unlikely;
+
+        evaluateGenericInitrav(tr, tr->start);
+
+        treeEvaluate(tr, 1.0);
+
+        thoroughOptimization(tr, adef, rl, i);
+
+    }
+#endif
+
+
+
+    /*************************************************************************************************************/
+
+    if(tr->rateHetModel == CAT)
+    {
+        catToGamma(tr, adef);
+        modOpt(tr, adef, TRUE, adef->likelihoodEpsilon);
+    }
+
+    bestIndex = -1;
+    bestLH = unlikely;
+
+#ifdef _WAYNE_MPI
+    for(i = 0; i < slowSearches; i++)
+    {
+        j = i + n * processID;
+        restoreTL(rl, tr, j);
+        resetBranches(tr);
+
+        evaluateGenericInitrav(tr, tr->start);
+
+        treeEvaluate(tr, 2);
+
+        printBothOpen("Slow ML Search %d Likelihood: %f\n", j, tr->likelihood);
+
+        if(tr->likelihood > bestLH)
+        {
+            bestLH = tr->likelihood;
+            bestIndex = j;
+        }
+    }
+    /*printf("processID = %d, bestIndex = %d; bestLH = %f\n", processID, bestIndex, bestLH);*/
+#else
+    for(i = 0; i < slowSearches; i++)
+    {
+        restoreTL(rl, tr, i);
+        resetBranches(tr);
+
+        evaluateGenericInitrav(tr, tr->start);
+
+        treeEvaluate(tr, 2);
+
+        printBothOpen("Slow ML Search %d Likelihood: %f\n", i, tr->likelihood);
+
+        if(tr->likelihood > bestLH)
+        {
+            bestLH = tr->likelihood;
+            bestIndex = i;
+        }
+    }
+#endif
+
+    printBothOpenMPI("Slow ML optimization finished\n\n");
+
+    t = gettime() - t;
+
+#ifdef _WAYNE_MPI
+    printBothOpen("Slow ML search on Process %d: Time %f seconds\n", processID, t);
+#else
+    printBothOpen("Slow ML search Time: %f seconds\n", t);
+#endif
+
+    t = gettime();
+
+    restoreTL(rl, tr, bestIndex);
+    resetBranches(tr);
+
+    evaluateGenericInitrav(tr, tr->start);
+
+    treeEvaluate(tr, 2);
+
+    Thorough = 1;
+    tr->doCutoff = FALSE;
+
+    treeOptimizeThorough(tr, 1, 10);
+    evaluateGenericInitrav(tr, tr->start);
+
+    modOpt(tr, adef, TRUE, adef->likelihoodEpsilon);
+    t = gettime() - t;
+
+#ifdef _WAYNE_MPI
+    printBothOpen("Thorough ML search on Process %d: Time %f seconds\n", processID, t);
+#else
+    printBothOpen("Thorough ML search Time: %f seconds\n", t);
+#endif
+
+#ifdef _WAYNE_MPI
+    bestLH = tr->likelihood;
+
+    printf("\nprocessID = %d, bestLH = %f\n", processID,  bestLH);
+
+    if(processes > 1)
+    {
+        double *buffer;
+        int bestProcess;
+
+        buffer = (double *)rax_malloc(sizeof(double) * processes);
+        for(i = 0; i < processes; i++)
+            buffer[i] = unlikely;
+        buffer[processID] = bestLH;
+        for(i = 0; i < processes; i++)
+            MPI_Bcast(&buffer[i], 1, MPI_DOUBLE, i, MPI_COMM_WORLD);
+        bestLH = buffer[0];
+        bestProcess = 0;
+        for(i = 1; i < processes; i++)
+            if(buffer[i] > bestLH)
+            {
+                bestLH = buffer[i];
+                bestProcess = i;
+            }
+        rax_free(buffer);
+
+        if(processID != bestProcess)
+        {
+            MPI_Finalize();
+            exit(0);
+        }
+    }
+#endif
+
+    printBothOpen("\nFinal ML Optimization Likelihood: %f\n", tr->likelihood);
+    printBothOpen("\nModel Information:\n\n");
+
+    printModelParams(tr, adef);
+
+    strcpy(bestTreeFileName, workdir);
+    strcat(bestTreeFileName, "RAxML_bestTree.");
+    strcat(bestTreeFileName,         run_id);
+
+    Tree2String(tr->tree_string, tr, tr->start->back, TRUE, TRUE, FALSE, FALSE, TRUE, adef, SUMMARIZE_LH, FALSE, FALSE, FALSE, FALSE);
+    f1 = myfopen(bestTreeFileName, "wb");
+    fprintf(f1, "%s", tr->tree_string);
+    fclose(f1);
+
+    if(adef->perGeneBranchLengths)
+        printTreePerGene(tr, adef, bestTreeFileName, "w");
+
+
+    overallTime = gettime() - masterTime;
+    mlTime    = gettime() - mlTime;
+
+    printBothOpen("\nML search took %f secs or %f hours\n", mlTime, mlTime / 3600.0);
+    printBothOpen("\nCombined Bootstrap and ML search took %f secs or %f hours\n", overallTime, overallTime / 3600.0);
+    printBothOpen("\nDrawing Bootstrap Support Values on best-scoring ML tree ...\n\n");
+
+
+    freeTL(rl);
+    rax_free(rl);
+
+    calcBipartitions(tr, adef, bestTreeFileName, bootstrapFileName);
+
+
+    overallTime = gettime() - masterTime;
+
+    printBothOpen("Program execution info written to %s\n", infoFileName);
+    printBothOpen("All %d bootstrapped trees written to: %s\n\n", bootstrapsPerformed, bootstrapFileName);
+    printBothOpen("Best-scoring ML tree written to: %s\n\n", bestTreeFileName);
+    if(adef->perGeneBranchLengths && tr->NumberOfModels > 1)
+        printBothOpen("Per-Partition branch lengths of best-scoring ML tree written to %s.PARTITION.0 to  %s.PARTITION.%d\n\n", bestTreeFileName,  bestTreeFileName,
+                      tr->NumberOfModels - 1);
+    printBothOpen("Best-scoring ML tree with support values written to: %s\n\n", bipartitionsFileName);
+    printBothOpen("Best-scoring ML tree with support values as branch labels written to: %s\n\n", bipartitionsFileNameBranchLabels);
+    printBothOpen("Overall execution time for full ML analysis: %f secs or %f hours or %f days\n\n", overallTime, overallTime/3600.0, overallTime/86400.0);
+
+#ifdef _WAYNE_MPI
+    MPI_Finalize();
+#endif
+
+    exit(0);
 }
 
 
@@ -1223,27 +1209,27 @@ void doAllInOne(tree *tr, analdef *adef)
 
 void doBootstrap(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
 {
-  int 
+  int
     bootstrapsPerformed,
-    i, 
-    n, 
+    i,
+    n,
     treeVectorLength = -1;
   unsigned int
     vLength = 0;
 
-#ifdef _WAYNE_MPI 
-  int 
+#ifdef _WAYNE_MPI
+  int
     j,
     bootStopTests = 1;
 #endif
 
-  double loopTime, pearsonAverage;
+  double loopTime, pearsonAverage = 0.0;
   hashtable *h = (hashtable*)NULL;
   unsigned int **bitVectors = (unsigned int **)NULL;
-  boolean bootStopIt = FALSE; 
-  
+  boolean bootStopIt = FALSE;
 
-  n = adef->multipleRuns; 
+
+  n = adef->multipleRuns;
 
 #ifdef _WAYNE_MPI
   if(n % processes != 0)
@@ -1252,12 +1238,12 @@ void doBootstrap(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
 #endif
 
   if(adef->bootStopping)
-    {    
+    {
       h = initHashTable(tr->mxtips * 100);
-      bitVectors = initBitVector(tr, &vLength);    
+      bitVectors = initBitVector(tr, &vLength);
 
-      treeVectorLength = adef->multipleRuns;        
-    }           
+      treeVectorLength = adef->multipleRuns;
+    }
 
 #ifdef _WAYNE_MPI
   int64_t parsimonySeed0 = adef->parsimonySeed;
@@ -1267,99 +1253,99 @@ void doBootstrap(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
 #endif
 
   for(i = 0; i < n && !bootStopIt; i++)
-    {    
+    {
       loopTime = gettime();
-                    
+
 #ifdef _WAYNE_MPI
       if(i == 0)
         {
           if(parsimonySeed0 != 0)
             adef->parsimonySeed = parsimonySeed0 + 10000 * processID;
-	  
+
           adef->rapidBoot = replicateSeed0 + 10000 * processID;
 	  adef->boot = bootstrapSeed0 + 10000 * processID;
         }
       j  = i + n*processID;
       singleBootstrap(tr, j, adef, rdta, cdta);
-#else      
-      singleBootstrap(tr, i, adef, rdta, cdta);              
+#else
+      singleBootstrap(tr, i, adef, rdta, cdta);
 #endif
-      loopTime = gettime() - loopTime;     
-      writeInfoFile(adef, tr, loopTime);  
+      loopTime = gettime() - loopTime;
+      writeInfoFile(adef, tr, loopTime);
 
       if(adef->bootStopping)
 #ifdef _WAYNE_MPI
 	{
-	  int 
+	  int
 	    nn = (i + 1) * processes;
 
-	  if((nn > START_BSTOP_TEST) && 
+	  if((nn > START_BSTOP_TEST) &&
 	     (i * processes < FC_SPACING * bootStopTests) &&
 	     ((i + 1) * processes >= FC_SPACING * bootStopTests)
-	     )	     
+	     )
 	    {
 	      MPI_Barrier(MPI_COMM_WORLD);
-	                    
-	      concatenateBSFiles(processes, bootstrapFileName);               
-	      
+
+	      concatenateBSFiles(processes, bootstrapFileName);
+
               MPI_Barrier(MPI_COMM_WORLD);
-	     
+
 	      bootStopIt = computeBootStopMPI(tr, bootstrapFileName, adef, &pearsonAverage);
 	      bootStopTests++;
 	    }
 	}
-#else	      	
+#else
       bootStopIt = bootStop(tr, h, i, &pearsonAverage, bitVectors, treeVectorLength, vLength, adef);
 #endif
-    }      
+    }
 
 #ifdef _WAYNE_MPI
   MPI_Barrier(MPI_COMM_WORLD);
-  
+
   bootstrapsPerformed = i * processes;
-  
+
   if(processID == 0)
-    {      
+    {
       if(!adef->bootStopping)
 	concatenateBSFiles(processes, bootstrapFileName);
 
-      removeBSFiles(processes, bootstrapFileName);      
+      removeBSFiles(processes, bootstrapFileName);
     }
-  
-  MPI_Barrier(MPI_COMM_WORLD); 
+
+  MPI_Barrier(MPI_COMM_WORLD);
 #else
   bootstrapsPerformed = i;
 #endif
-  
+
   adef->multipleRuns = bootstrapsPerformed;
-  
+
   if(adef->bootStopping)
     {
       freeBitVectors(bitVectors, 2 * tr->mxtips);
       rax_free(bitVectors);
       freeHashTable(h);
       rax_free(h);
-      
-       
+
+
       if(bootStopIt)
 	{
 	  switch(tr->bootStopCriterion)
 	    {
 	    case FREQUENCY_STOP:
 	      printBothOpenMPI("Stopped Standard BS search after %d replicates with FC Bootstopping criterion\n", bootstrapsPerformed);
-	      printBothOpenMPI("Pearson Average of %d random splits: %f\n",adef->bootstopPermutations , pearsonAverage);	      
+	      printBothOpenMPI("Pearson Average of %d random splits: %f\n",adef->bootstopPermutations , pearsonAverage);
 	      break;
 	    case MR_STOP:
 	      printBothOpenMPI("Stopped Standard BS search after %d replicates with MR-based Bootstopping criterion\n", bootstrapsPerformed);
-	      printBothOpenMPI("WRF Average of %d random splits: %f %%\n", adef->bootstopPermutations, pearsonAverage);	     
+	      printBothOpenMPI("WRF Average of %d random splits: %f %%\n", adef->bootstopPermutations, pearsonAverage);
 	      break;
 	    case MRE_STOP:
 	      printBothOpenMPI("Stopped Standard BS search after %d replicates with MRE-based Bootstopping criterion\n", bootstrapsPerformed);
-	      printBothOpenMPI("WRF Average of %d random splits: %f %%\n", adef->bootstopPermutations, pearsonAverage);	     
+	      printBothOpenMPI("WRF Average of %d random splits: %f %%\n", adef->bootstopPermutations, pearsonAverage);
 	      break;
 	    case MRE_IGN_STOP:
 	      printBothOpenMPI("Stopped Standard BS search after %d replicates with MRE_IGN-based Bootstopping criterion\n", bootstrapsPerformed);
-	      printBothOpenMPI("WRF Average of %d random splits: %f %%\n", adef->bootstopPermutations, pearsonAverage);	     
+	      printBothOpenMPI("WRF Average of %d random splits: %f %%\n", adef->bootstopPermutations, pearsonAverage);
 	      break;
 	    default:
 	      assert(0);
@@ -1388,7 +1374,7 @@ void doBootstrap(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
 	    default:
 	      assert(0);
 	    }
-	}     
+	}
     }
 }
 
@@ -1396,552 +1382,802 @@ void doBootstrap(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
 
 static void printMesquite(tree *tr, analdef *adef)
 {
-  if(adef->mesquite)
+    if(adef->mesquite)
     {
-      FILE 
-	*f = myfopen(mesquiteTrees, "ab"),
-	*models = myfopen(mesquiteModel, "ab");
-      
-      
-      Tree2String(tr->tree_string, tr, tr->start->back, TRUE, TRUE, FALSE, FALSE, TRUE, adef, SUMMARIZE_LH, FALSE, FALSE, FALSE, FALSE);
-	  
-      fprintf(f, "%s", tr->tree_string);
-	  
-      fprintf(models, "%f\n", tr->likelihood);
-      
-      //TODO extend whatever is printed here 
-      //TODO decide if we just want to print the model params of the final 
-      // optimal tree, probably makes most sense ...
+        FILE *f = myfopen(mesquiteTrees, "ab"),
+                *models = myfopen(mesquiteModel, "ab");
 
-      fclose(f);      
-      fclose(models);
-      
-      //printf("print mesquite\n");
-    }    
+
+        Tree2String(tr->tree_string, tr, tr->start->back, TRUE, TRUE, FALSE, FALSE, TRUE, adef, SUMMARIZE_LH, FALSE, FALSE, FALSE, FALSE);
+
+        fprintf(f, "%s", tr->tree_string);
+
+        fprintf(models, "%f\n", tr->likelihood);
+
+        //TODO extend whatever is printed here
+        //TODO decide if we just want to print the model params of the final
+        // optimal tree, probably makes most sense ...
+
+        fclose(f);
+        fclose(models);
+
+        //printf("print mesquite\n");
+    }
 }
 
 static void printMesquiteAllTrees(tree *tr, analdef *adef)
 {
-  if(adef->mesquite)
+    if(adef->mesquite)
     {
-      FILE 
-	*f = myfopen(mesquiteMLTrees, "ab");
-            
-      Tree2String(tr->tree_string, tr, tr->start->back, TRUE, TRUE, FALSE, FALSE, TRUE, adef, SUMMARIZE_LH, FALSE, FALSE, FALSE, FALSE);
-	  
-      fprintf(f, "%s", tr->tree_string);	                    
-
-      fclose(f);           
-    }    
+        FILE* f = myfopen(mesquiteMLTrees, "ab");
+        Tree2String(tr->tree_string, tr, tr->start->back, TRUE, TRUE, FALSE, FALSE, TRUE, adef, SUMMARIZE_LH, FALSE, FALSE, FALSE, FALSE);
+        fprintf(f, "%s", tr->tree_string);
+        fclose(f);
+    }
 }
 
 static void printMesquiteLog(analdef *adef, double l1, double l2, boolean justOneValue)
 {
-  if(adef->mesquite)
-    {
-      FILE 
-	*f = myfopen(mesquiteMLLikes, "ab");
-      
-      if(justOneValue)
-	fprintf(f, "%f\n", l1);
-      else
-	fprintf(f, "%f\t%f\n", l1, l2);
-      
-      fclose(f);
+    if(adef->mesquite) {
+        FILE *f = myfopen(mesquiteMLLikes, "ab");
+        if(justOneValue)
+            fprintf(f, "%f\n", l1);
+        else
+            fprintf(f, "%f\t%f\n", l1, l2);
+        fclose(f);
     }
 }
 
-  
+// **************************************************************************************************************
+// OPENMP
+// **************************************************************************************************************
+
+#if defined(_OPENMP)
 
 void doInference(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
 {
-  int i, n;
+    assert(tr->catOnly == 0);   // catOnly not supported in OPENMP mode (hardly makes sense)
 
-#ifdef _WAYNE_MPI
-  int 
-    j,
-    bestProcess;
-#endif
+    const int number_of_runs = adef->multipleRuns;
 
-  double loopTime;
-  topolRELL_LIST *rl = (topolRELL_LIST *)NULL; 
-  int 
-    best = -1,
-    newBest = -1;
-  double 
-    bestLH = unlikely; 
-  FILE *f;
-  char bestTreeFileName[1024]; 
-  double overallTime;
+    int best = -1, newBest = -1;
+    double bestLH = unlikely;
+    char bestTreeFileName[1024];
 
-  double
-    *unOptLikes = (double*)rax_malloc(sizeof(double) * (size_t)adef->multipleRuns),
-    *optLikes   = (double*)rax_malloc(sizeof(double) * (size_t)adef->multipleRuns);
+    double *unOptLikes = (double*)rax_malloc(sizeof(double) * (size_t)adef->multipleRuns),
+            *optLikes   = (double*)rax_malloc(sizeof(double) * (size_t)adef->multipleRuns);
 
-  n = adef->multipleRuns;
 
-  for(i = 0; i < n; i++)
-    {
-      unOptLikes[i] = unlikely;
-      optLikes[i] = unlikely;
-    }
-     
-#ifdef _WAYNE_MPI
-  if(n % processes != 0)
-    n = processes * ((n / processes) + 1);
-#endif 
-
-  if(!tr->catOnly)
-    {
-      rl = (topolRELL_LIST *)rax_malloc(sizeof(topolRELL_LIST));
-      initTL(rl, tr, n);
+    for (int i11 = 0; i11 < number_of_runs; i11++) {
+        unOptLikes[i11] = unlikely;
+        optLikes[i11] = unlikely;
     }
 
-#ifdef _WAYNE_MPI
-  int64_t parsimonySeed0 = adef->parsimonySeed;
-  n = n / processes;
-#endif
+    topolRELL_LIST *rl = (topolRELL_LIST *)rax_malloc(sizeof(topolRELL_LIST));
+    initTL(rl, tr, number_of_runs);
 
-  if(adef->rellBootstrap)
-    { 
-#ifdef _WAYNE_MPI          
-      tr->resample = permutationSH(tr, NUM_RELL_BOOTSTRAPS, parsimonySeed0 + 10000 * processID); 
-#else     
-      tr->resample = permutationSH(tr, NUM_RELL_BOOTSTRAPS, adef->parsimonySeed);        
-#endif
+    if (adef->rellBootstrap) {
+        tr->resample = permutationSH(tr, NUM_RELL_BOOTSTRAPS, adef->parsimonySeed);
 
-       tr->rellTrees = (treeList *)rax_malloc(sizeof(treeList));
-       initTreeList(tr->rellTrees, tr, NUM_RELL_BOOTSTRAPS);
+        tr->rellTrees = (treeList *)rax_malloc(sizeof(treeList));
+        initTreeList(tr->rellTrees, tr, NUM_RELL_BOOTSTRAPS);
     }
-  else
-    {
-      tr->resample = (int *)NULL;
-      tr->rellTrees =  (treeList *)NULL;
+    else {
+        tr->resample = (int *)NULL;
+        tr->rellTrees =  (treeList *)NULL;
     }
 
-  for(i = 0; i < n; i++)
-    { 
-#ifdef _WAYNE_MPI 
-      if(i == 0)
-        { 
-          if(parsimonySeed0 != 0) 
-            adef->parsimonySeed = parsimonySeed0 + 10000 * processID;
+    for (int thread_no = 0; thread_no < number_of_runs; thread_no++) {
+        printf(">>> %d doInference [%f]\n", thread_no, gettime() - masterTime);
+        tr->treeID = thread_no;
+        tr->checkPointCounter = 0;
+        const double loopTime = gettime();
+        initModel(tr, rdta, cdta, adef);
+        if (thread_no == 0)
+            printBaseFrequencies(tr);
+        getStartingTree(tr, adef);
+
+        computeBIGRAPID(tr, adef, TRUE);
+
+        unOptLikes[thread_no] = tr->likelihood;
+
+        if (tr->likelihood > bestLH) {
+            best = thread_no;
+            bestLH = tr->likelihood;
         }
-      j = i + n * processID;
-      tr->treeID = j;
-#else    
-      tr->treeID = i;
-#endif
 
-      tr->checkPointCounter = 0;
-         
-      loopTime = gettime();
-                                             
-      initModel(tr, rdta, cdta, adef); 
+        saveTL(rl, tr, thread_no);
+        writeInfoFile(adef, tr, gettime() - loopTime);
+        printf(">>> %d doInference done [%f] [%f]\n", thread_no, gettime() - loopTime, gettime() - masterTime);
+    }
 
-      if(i == 0)
-	printBaseFrequencies(tr);
-     
-      getStartingTree(tr, adef); 
-                       
-      computeBIGRAPID(tr, adef, TRUE);  
+    assert(best >= 0);
 
-      unOptLikes[i] = tr->likelihood;    
-     
-      if(tr->catOnly)
-	{
-	  printMesquiteLog(adef, unOptLikes[i], 0.0, TRUE);	 	  
-	  printMesquite(tr, adef); 	 
-	  printMesquiteAllTrees(tr, adef); 		  		
-	}
+    printBothOpenMPI("\n\nConducting final model optimizations on all %d trees under GAMMA-based models ....\n\n", number_of_runs);
 
-#ifdef _WAYNE_MPI
-      if(tr->likelihood > bestLH)
-	{
-	  best = j;
-	  bestLH = tr->likelihood;
-	}
+    if (tr->rateHetModel == GAMMA ||  tr->rateHetModel == GAMMA_I) {
+        restoreTL(rl, tr, best);
+        evaluateGenericInitrav(tr, tr->start);
+        if(!adef->useBinaryModelFile)
+            modOpt(tr, adef, FALSE, adef->likelihoodEpsilon);
+        else {
+            readBinaryModel(tr, adef);
+            evaluateGenericInitrav(tr, tr->start);
+            treeEvaluate(tr, 2);
+        }
+        bestLH = tr->likelihood;
+        tr->likelihoods[best] = tr->likelihood;
+        saveTL(rl, tr, best);
+        tr->treeID = best;
+        printResult(tr, adef, TRUE);
+        newBest = best;
 
-      if(!tr->catOnly)
-	saveTL(rl, tr, j);
-#else
-      if(tr->likelihood > bestLH)
-	{
-	  best = i;
-	  bestLH = tr->likelihood;
-	}
+        for (int i13 = 0; i13 < number_of_runs; i13++) {
+            if (i13 != best) {
+                restoreTL(rl, tr, i13);
+                evaluateGenericInitrav(tr, tr->start);
+                treeEvaluate(tr, 1);
+                tr->likelihoods[i13] = tr->likelihood;
 
-      if(!tr->catOnly)
-	saveTL(rl, tr, i);
-#endif
+                if(tr->likelihood > bestLH) {
+                    newBest = i13;
+                    bestLH = tr->likelihood;
+                    saveTL(rl, tr, i13);
+                }
+                tr->treeID = i13;
+                printResult(tr, adef, TRUE);
+                printMesquite(tr, adef);
+                printMesquiteAllTrees(tr, adef);
+                optLikes[i13] = tr->likelihood;
+            }
+            else {
+                if(adef->mesquite) {
+                    restoreTL(rl, tr, i13);
+                    evaluateGenericInitrav(tr, tr->start);
+                    printMesquite(tr, adef);
+                    printMesquiteAllTrees(tr, adef);
+                    optLikes[i13] = tr->likelihood;
+                }
+            }
 
-      loopTime = gettime() - loopTime; 
-      writeInfoFile(adef, tr, loopTime);     
-    }     
- 
-  assert(best >= 0);
+            printMesquiteLog(adef, unOptLikes[i13], optLikes[i13], FALSE);
 
-#ifdef _WAYNE_MPI
-  MPI_Barrier(MPI_COMM_WORLD);
-  n = n * processes;
-#endif
+            if(number_of_runs == 1)
+                printBothOpen("Inference[%d] final GAMMA-based Likelihood: %f tree written to file %s\n", i13, tr->likelihoods[i13], resultFileName);
+            else
+                printBothOpen("Inference[%d] final GAMMA-based Likelihood: %f tree written to file %s.RUN.%d\n", i13, tr->likelihoods[i13], resultFileName, i13);
+        }
+    }
+    else {
+        catToGamma(tr, adef);
 
-  if(tr->catOnly)
-    {
-      printBothOpenMPI("\n\nNOT conducting any final model optimizations on all %d trees under CAT-based model ....\n", n);
-      printBothOpenMPI("\nREMEMBER that CAT-based likelihood scores are meaningless!\n\n", n);        
-#ifdef _WAYNE_MPI
-      if(processID != 0)
+        for(int i14 = 0; i14 < number_of_runs; i14++)
+            rl->t[i14]->likelihood = unlikely;
+
+        initModel(tr, rdta, cdta, adef);
+
+        restoreTL(rl, tr, best);
+
+        resetBranches(tr);
+        evaluateGenericInitrav(tr, tr->start);
+        modOpt(tr, adef, TRUE, adef->likelihoodEpsilon);
+        tr->likelihoods[best] = tr->likelihood;
+        bestLH = tr->likelihood;
+        saveTL(rl, tr, best);
+        tr->treeID = best;
+        printResult(tr, adef, TRUE);
+        newBest = best;
+
+        for(int i15 = 0; i15 < number_of_runs; i15++) {
+            if(i15 != best) {
+                restoreTL(rl, tr, i15);
+                resetBranches(tr);
+                evaluateGenericInitrav(tr, tr->start);
+                treeEvaluate(tr, 2);
+                tr->likelihoods[i15] = tr->likelihood;
+
+                if(tr->likelihood > bestLH) {
+                    newBest = i15;
+                    bestLH = tr->likelihood;
+                    saveTL(rl, tr, i15);
+                }
+                tr->treeID = i15;
+                printResult(tr, adef, TRUE);
+                printMesquite(tr, adef);
+                printMesquiteAllTrees(tr, adef);
+                optLikes[i15] = tr->likelihood;
+            }
+            else {
+                if(adef->mesquite) {
+                    restoreTL(rl, tr, i15);
+                    evaluateGenericInitrav(tr, tr->start);
+                    printMesquite(tr, adef);
+                    printMesquiteAllTrees(tr, adef);
+                    optLikes[i15] = tr->likelihood;
+                }
+            }
+
+            printMesquiteLog(adef, unOptLikes[i15], optLikes[i15], FALSE);
+            if (number_of_runs == 1)
+                printBothOpen("Inference[%d] final GAMMA-based Likelihood: %f tree written to file %s\n", i15, tr->likelihoods[i15], resultFileName);
+            else
+                printBothOpen("Inference[%d] final GAMMA-based Likelihood: %f tree written to file %s.RUN.%d\n", i15, tr->likelihoods[i15], resultFileName, i15);
+        }
+    }
+
+    assert(newBest >= 0);
+
+    restoreTL(rl, tr, newBest);
+    evaluateGenericInitrav(tr, tr->start);
+
+    printBothOpen("\n\nStarting final GAMMA-based thorough Optimization on tree %d likelihood %f .... \n\n", newBest, tr->likelihoods[newBest]);
+
+    Thorough = 1;
+    tr->doCutoff = FALSE;
+    treeOptimizeThorough(tr, 1, 10);
+    evaluateGenericInitrav(tr, tr->start);
+
+    printBothOpen("Final GAMMA-based Score of best tree %f\n\n", tr->likelihood);
+
+
+    strcpy(bestTreeFileName, workdir);
+    strcat(bestTreeFileName, "RAxML_bestTree.");
+    strcat(bestTreeFileName, run_id);
+
+    Tree2String(tr->tree_string, tr, tr->start->back, TRUE, TRUE, FALSE, FALSE, TRUE, adef, SUMMARIZE_LH, FALSE, FALSE, FALSE, FALSE);
+
+    FILE *f1 = myfopen(bestTreeFileName, "wb");
+    fprintf(f1, "%s", tr->tree_string);
+    fclose(f1);
+
+    printMesquite(tr, adef);
+
+    if (adef->perGeneBranchLengths)
+        printTreePerGene(tr, adef, bestTreeFileName, "w");
+
+    if (adef->rellBootstrap) {
+        //WARNING the functions below need to be invoked after all other trees have been printed
+        //don't move this part of the code further up!
+
+        int i2;
+        FILE *f2 = myfopen(rellBootstrapFileName, "wb");
+
+        for(i2 = 0; i2 < NUM_RELL_BOOTSTRAPS; i2++)
         {
-          MPI_Finalize();
-          exit(0);
+            restoreTreeList(tr->rellTrees, tr, i2);
+            Tree2String(tr->tree_string, tr, tr->start->back, FALSE, TRUE, FALSE, FALSE, TRUE, adef, SUMMARIZE_LH, FALSE, FALSE, FALSE, FALSE);
+            fprintf(f2, "%s", tr->tree_string);
         }
-#endif
-    }
-  else
-    {
-      printBothOpenMPI("\n\nConducting final model optimizations on all %d trees under GAMMA-based models ....\n\n", n);
- 
-#ifdef _WAYNE_MPI
-      n = n / processes;
-#endif
 
-      if(tr->rateHetModel == GAMMA ||  tr->rateHetModel == GAMMA_I)
-	{
-	  restoreTL(rl, tr, best);
-	  evaluateGenericInitrav(tr, tr->start);
-	  if(!adef->useBinaryModelFile)
-	    modOpt(tr, adef, FALSE, adef->likelihoodEpsilon); 
-	  else
-	    {
-	      readBinaryModel(tr, adef);
-	      evaluateGenericInitrav(tr, tr->start);
-	      treeEvaluate(tr, 2);
-	    }
-	  bestLH = tr->likelihood;
-	  tr->likelihoods[best] = tr->likelihood;
-	  saveTL(rl, tr, best);
-	  tr->treeID = best; 
-	  printResult(tr, adef, TRUE);	
-	  newBest = best;      
-	  
-	  for(i = 0; i < n; i++)
-	    {
-#ifdef _WAYNE_MPI
-	      j = i + n * processID;
-	      if(j != best)
-		{
-		  restoreTL(rl, tr, j);
-		  evaluateGenericInitrav(tr, tr->start);
-		  treeEvaluate(tr, 1);
-		  tr->likelihoods[j] = tr->likelihood;
-		  
-		  if(tr->likelihood > bestLH)
-		    {
-		      newBest = j;
-		      bestLH = tr->likelihood;		  
-		      saveTL(rl, tr, j);
-		    }
-		  tr->treeID = j;
-		  printResult(tr, adef, TRUE);
-		}
-	      if(n == 1 && processes == 1)
-		printBothOpen("Inference[%d] final GAMMA-based Likelihood: %f tree written to file %s\n", i, tr->likelihoods[i], resultFileName);	   
-	      else	    
-		printBothOpen("Inference[%d] final GAMMA-based Likelihood: %f tree written to file %s.RUN.%d\n", j, tr->likelihoods[j], resultFileName, j);
-#else	  
-	      if(i != best)
-		{
-		  restoreTL(rl, tr, i);
-		  evaluateGenericInitrav(tr, tr->start);
-		  treeEvaluate(tr, 1);
-		  tr->likelihoods[i] = tr->likelihood;
-		  
-		  if(tr->likelihood > bestLH)
-		    {
-		      newBest = i;
-		      bestLH = tr->likelihood;		  
-		      saveTL(rl, tr, i);
-		    }
-		  tr->treeID = i;
-		  printResult(tr, adef, TRUE);
-		  printMesquite(tr, adef);		 
-		  printMesquiteAllTrees(tr, adef); 
-		  optLikes[i] = tr->likelihood; 
-		}
-	      else
-		{
-		  if(adef->mesquite)
-		    {
-		      restoreTL(rl, tr, i);
-		      evaluateGenericInitrav(tr, tr->start);
-		      printMesquite(tr, adef);	
-		      printMesquiteAllTrees(tr, adef); 
-		      optLikes[i] = tr->likelihood; 
-		    }
-		}
-	      	      
-	      printMesquiteLog(adef, unOptLikes[i], optLikes[i], FALSE);
+        freeTreeList(tr->rellTrees);
+        rax_free(tr->rellTrees);
+        rax_free(tr->resample);
 
-	      if(n == 1)
-		printBothOpen("Inference[%d] final GAMMA-based Likelihood: %f tree written to file %s\n", i, tr->likelihoods[i], resultFileName);	   
-	      else	    
-		printBothOpen("Inference[%d] final GAMMA-based Likelihood: %f tree written to file %s.RUN.%d\n", i, tr->likelihoods[i], resultFileName, i);
-#endif	    	 
-	    }	  
-	}
-      else
-	{     
-	  catToGamma(tr, adef);
-	  
-#ifdef _WAYNE_MPI
-	  for(i = 0; i < n; i++)
-            {
-              j = i + n*processID;
-	      rl->t[j]->likelihood = unlikely;
-            }  
-#else
-	  for(i = 0; i < n; i++)
-	    rl->t[i]->likelihood = unlikely;
-#endif
-	  
-	  initModel(tr, rdta, cdta, adef);
-	  
-	  restoreTL(rl, tr, best);      
-	  
-	  resetBranches(tr);
-	  evaluateGenericInitrav(tr, tr->start);
-	  modOpt(tr, adef, TRUE, adef->likelihoodEpsilon);      
-	  tr->likelihoods[best] = tr->likelihood;
-	  bestLH = tr->likelihood;     
-	  saveTL(rl, tr, best);
-	  tr->treeID = best;
-	  printResult(tr, adef, TRUE);	 
-	  newBest = best;
-	  
-	  for(i = 0; i < n; i++)
-	    {
-#ifdef _WAYNE_MPI
-	      j = i + n*processID;
-	      if(j != best)
-		{
-		  restoreTL(rl, tr, j);	    
-		  resetBranches(tr);
-		  evaluateGenericInitrav(tr, tr->start);
-		  treeEvaluate(tr, 2);
-		  tr->likelihoods[j] = tr->likelihood;
-		  
-		  if(tr->likelihood > bestLH)
-		    { 
-		      newBest = j;
-		      bestLH = tr->likelihood;		
-		      saveTL(rl, tr, j);	  
-		    }
-		  tr->treeID = j;
-		  printResult(tr, adef, TRUE);
-		} 
-	      
-	      if(n == 1 && processes == 1)	    
-		printBothOpen("Inference[%d] final GAMMA-based Likelihood: %f tree written to file %s\n", i, tr->likelihoods[i], resultFileName);
-	      else
-		printBothOpen("Inference[%d] final GAMMA-based Likelihood: %f tree written to file %s.RUN.%d\n", j, tr->likelihoods[j], resultFileName, j);
-#else
-	      if(i != best)
-		{
-		  restoreTL(rl, tr, i);	    
-		  resetBranches(tr);
-		  evaluateGenericInitrav(tr, tr->start);
-		  treeEvaluate(tr, 2);
-		  tr->likelihoods[i] = tr->likelihood;
-		  
-		  if(tr->likelihood > bestLH)
-		    { 
-		      newBest = i;
-		      bestLH = tr->likelihood;		
-		      saveTL(rl, tr, i);	  
-		    }
-		  tr->treeID = i;
-		  printResult(tr, adef, TRUE);	
-		  printMesquite(tr, adef);
-		  printMesquiteAllTrees(tr, adef); 
-		  optLikes[i] = tr->likelihood; 
-		} 
-	      else
-		{
-		  if(adef->mesquite)
-		    {
-		      restoreTL(rl, tr, i);
-		      evaluateGenericInitrav(tr, tr->start);
-		      printMesquite(tr, adef);	
-		      printMesquiteAllTrees(tr, adef); 
-		      optLikes[i] = tr->likelihood; 
-		    }
-		}
+        fclose(f2);
 
-	      printMesquiteLog(adef, unOptLikes[i], optLikes[i], FALSE);	    
-	      
-	      if(n == 1)	    
-		printBothOpen("Inference[%d] final GAMMA-based Likelihood: %f tree written to file %s\n", i, tr->likelihoods[i], resultFileName);
-	      else
-		printBothOpen("Inference[%d] final GAMMA-based Likelihood: %f tree written to file %s.RUN.%d\n", i, tr->likelihoods[i], resultFileName, i);	   	  
-#endif
-	    }
-	}     
-    
-      assert(newBest >= 0);
-
-#ifdef _WAYNE_MPI
-      if(processes > 1)
-	{
-	  double 
-	    *buffer = (double *)rax_malloc(sizeof(double) * processes);
-	  for(i = 0; i < processes; i++)
-	    buffer[i] = unlikely;
-	  buffer[processID] = bestLH;
-	  for(i = 0; i < processes; i++)
-	    MPI_Bcast(&buffer[i], 1, MPI_DOUBLE, i, MPI_COMM_WORLD);
-	  bestLH = buffer[0];
-	  bestProcess = 0;
-	  for(i = 1; i < processes; i++)
-	    if(buffer[i] > bestLH)
-	      {
-		bestLH = buffer[i];
-		bestProcess = i;
-	      }
-	  
-	  rax_free(buffer);	  	  
-	}
-
-      if(processID == bestProcess)
-	{
-#endif
-
-	  restoreTL(rl, tr, newBest);
-	  evaluateGenericInitrav(tr, tr->start);
-     
-	  printBothOpen("\n\nStarting final GAMMA-based thorough Optimization on tree %d likelihood %f .... \n\n", newBest, tr->likelihoods[newBest]);
-	  
-	  Thorough = 1;
-	  tr->doCutoff = FALSE; 
-	  treeOptimizeThorough(tr, 1, 10); 
-	  evaluateGenericInitrav(tr, tr->start);
-	  
-	  printBothOpen("Final GAMMA-based Score of best tree %f\n\n", tr->likelihood); 
-	  
-	  
-	  strcpy(bestTreeFileName, workdir); 
-	  strcat(bestTreeFileName, "RAxML_bestTree.");
-	  strcat(bestTreeFileName, run_id);
-	  
-	  
-	  Tree2String(tr->tree_string, tr, tr->start->back, TRUE, TRUE, FALSE, FALSE, TRUE, adef, SUMMARIZE_LH, FALSE, FALSE, FALSE, FALSE);
-	  
-	  f = myfopen(bestTreeFileName, "wb");
-	  fprintf(f, "%s", tr->tree_string);
-	  fclose(f);
-
-	  printMesquite(tr, adef);	 
-	  
-	  if(adef->perGeneBranchLengths)
-	    printTreePerGene(tr, adef, bestTreeFileName, "w");      
-#ifdef _WAYNE_MPI
-	}
-#endif
+        printBothOpen("\nRELL bootstraps written to file %s\n", rellBootstrapFileName);
     }
 
-  if(adef->rellBootstrap)
-    {
-      //WARNING the functions below need to be invoked after all other trees have been printed
-      //don't move this part of the code further up!
+    printBothOpen("Program execution info written to %s\n", infoFileName);
+    printBothOpen("Best-scoring ML tree written to: %s\n\n", bestTreeFileName);
 
-      int
-	i;
-#ifdef _WAYNE_MPI
-      FILE 
-	*f = myfopen(rellBootstrapFileNamePID, "wb");      
-#else
-      FILE 
-	*f = myfopen(rellBootstrapFileName, "wb");
-#endif
-      
-      for(i = 0; i < NUM_RELL_BOOTSTRAPS; i++)
-	{
-	   restoreTreeList(tr->rellTrees, tr, i);
-	   Tree2String(tr->tree_string, tr, tr->start->back, FALSE, TRUE, FALSE, FALSE, TRUE, adef, SUMMARIZE_LH, FALSE, FALSE, FALSE, FALSE);
-	   fprintf(f, "%s", tr->tree_string);
-	}
+    if(adef->perGeneBranchLengths && tr->NumberOfModels > 1)
+        printBothOpen("Per-Partition branch lengths of best-scoring ML tree written to %s.PARTITION.0 to  %s.PARTITION.%d\n\n", bestTreeFileName,  bestTreeFileName,
+                      tr->NumberOfModels - 1);
 
-      freeTreeList(tr->rellTrees);
-      rax_free(tr->rellTrees);
-      rax_free(tr->resample);
-
-      fclose(f);
-
-#ifdef _WAYNE_MPI      
-      MPI_Barrier(MPI_COMM_WORLD);      
-      
-      concatenateBSFiles(processes, rellBootstrapFileName);
-      removeBSFiles(processes, rellBootstrapFileName);  
-      
-      MPI_Barrier(MPI_COMM_WORLD); 
-      
-      if(processID == 0)
-	printBothOpen("\nRELL bootstraps written to file %s\n", rellBootstrapFileName);
-#else
-      printBothOpen("\nRELL bootstraps written to file %s\n", rellBootstrapFileName);    
-#endif
+    if (adef->mesquite) {
+        printBothOpen("Mesquite tree file (including best final Tree) written to:   %s\n",  mesquiteTrees);
+        printBothOpen("Mesquite model file written to:   %s\n", mesquiteModel);
+        printBothOpen("Initial and final log likes of trees written to: %s\n", mesquiteMLLikes);
+        printBothOpen("Mesquite tree file (excluding best final Tree) written to: %s\n\n", mesquiteMLTrees);
     }
-  
-#ifdef _WAYNE_MPI 
-  if(processID == bestProcess)
-    {
-#endif
-      overallTime = gettime() - masterTime;
-      
-      printBothOpen("Program execution info written to %s\n", infoFileName);
-      
-      if(!tr->catOnly)
-	{
-	  printBothOpen("Best-scoring ML tree written to: %s\n\n", bestTreeFileName);
-	  
-	  if(adef->perGeneBranchLengths && tr->NumberOfModels > 1)    
-	    printBothOpen("Per-Partition branch lengths of best-scoring ML tree written to %s.PARTITION.0 to  %s.PARTITION.%d\n\n", bestTreeFileName,  bestTreeFileName, 
-			  tr->NumberOfModels - 1);  
 
-	  if(adef->mesquite)
-	    {
-	      printBothOpen("Mesquite tree file (including best final Tree) written to:   %s\n",  mesquiteTrees);
-	      printBothOpen("Mesquite model file written to:   %s\n", mesquiteModel);
-	      printBothOpen("Initial and final log likes of trees written to: %s\n", mesquiteMLLikes);
-	    }
-	}
-      else
-	{
-	  if(adef->mesquite)
-	    printBothOpen("Initial log likes of trees written to: %s\n", mesquiteMLLikes);
-	}
+    const double overallTime = gettime() - masterTime;
+    printBothOpen("Overall execution time: %f secs or %f hours or %f days\n\n", overallTime, overallTime/3600.0, overallTime/86400.0);
 
-      if(adef->mesquite)		  	  	 
-	printBothOpen("Mesquite tree file (excluding best final Tree) written to: %s\n\n", mesquiteMLTrees);
-	
-      
-      printBothOpen("Overall execution time: %f secs or %f hours or %f days\n\n", overallTime, overallTime/3600.0, overallTime/86400.0);    
-#ifdef _WAYNE_MPI 
-    }
-#endif
+    freeTL(rl);
+    rax_free(rl);
 
-  if(!tr->catOnly)
-    {
-      freeTL(rl);   
-      rax_free(rl); 
-    }
-  
-  rax_free(unOptLikes);
-  rax_free(optLikes);
+    rax_free(unOptLikes);
+    rax_free(optLikes);
 
-#ifdef _WAYNE_MPI
-  MPI_Finalize();
-#endif
-  exit(0);
+    exit(0);
 }
 
+
+// **************************************************************************************************************
+// no openmp
+#else
+
+void doInference(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
+{
+    int i1, n;
+
+#ifdef _WAYNE_MPI
+    int
+            j,
+            bestProcess;
+#endif
+
+    double loopTime;
+    topolRELL_LIST *rl = (topolRELL_LIST *)NULL;
+    int
+            best = -1,
+            newBest = -1;
+    double
+            bestLH = unlikely;
+    FILE *f1;
+    char bestTreeFileName[1024];
+    double overallTime;
+
+    double
+            *unOptLikes = (double*)rax_malloc(sizeof(double) * (size_t)adef->multipleRuns),
+            *optLikes   = (double*)rax_malloc(sizeof(double) * (size_t)adef->multipleRuns);
+
+    n = adef->multipleRuns;
+
+    for(i1 = 0; i1 < n; i1++)
+    {
+        unOptLikes[i1] = unlikely;
+        optLikes[i1] = unlikely;
+    }
+
+#ifdef _WAYNE_MPI
+    if(n % processes != 0)
+        n = processes * ((n / processes) + 1);
+#endif
+
+    if(!tr->catOnly)
+    {
+        rl = (topolRELL_LIST *)rax_malloc(sizeof(topolRELL_LIST));
+        initTL(rl, tr, n);
+    }
+
+#ifdef _WAYNE_MPI
+    int64_t parsimonySeed0 = adef->parsimonySeed;
+    n = n / processes;
+#endif
+
+    if(adef->rellBootstrap)
+    {
+#ifdef _WAYNE_MPI
+        tr->resample = permutationSH(tr, NUM_RELL_BOOTSTRAPS, parsimonySeed0 + 10000 * processID);
+#else
+        tr->resample = permutationSH(tr, NUM_RELL_BOOTSTRAPS, adef->parsimonySeed);
+#endif
+
+        tr->rellTrees = (treeList *)rax_malloc(sizeof(treeList));
+        initTreeList(tr->rellTrees, tr, NUM_RELL_BOOTSTRAPS);
+    }
+    else
+    {
+        tr->resample = (int *)NULL;
+        tr->rellTrees =  (treeList *)NULL;
+    }
+
+    for(i1 = 0; i1 < n; i1++)
+    {
+#ifdef _WAYNE_MPI
+        if(i == 0)
+        {
+            if(parsimonySeed0 != 0)
+                adef->parsimonySeed = parsimonySeed0 + 10000 * processID;
+        }
+        j = i1 + n * processID;
+        tr->treeID = j;
+#else
+        tr->treeID = i1;
+#endif
+
+        tr->checkPointCounter = 0;
+
+        loopTime = gettime();
+
+        initModel(tr, rdta, cdta, adef);
+
+        if(i1 == 0)
+            printBaseFrequencies(tr);
+
+        getStartingTree(tr, adef);
+
+        computeBIGRAPID(tr, adef, TRUE);
+
+        unOptLikes[i1] = tr->likelihood;
+
+        if(tr->catOnly)
+        {
+            printMesquiteLog(adef, unOptLikes[i1], 0.0, TRUE);
+            printMesquite(tr, adef);
+            printMesquiteAllTrees(tr, adef);
+        }
+
+#ifdef _WAYNE_MPI
+        if(tr->likelihood > bestLH)
+        {
+            best = j;
+            bestLH = tr->likelihood;
+        }
+
+        if(!tr->catOnly)
+            saveTL(rl, tr, j);
+#else
+        if(tr->likelihood > bestLH)
+        {
+            best = i1;
+            bestLH = tr->likelihood;
+        }
+
+        if(!tr->catOnly)
+            saveTL(rl, tr, i1);
+#endif
+
+        loopTime = gettime() - loopTime;
+        writeInfoFile(adef, tr, loopTime);
+    }
+
+    assert(best >= 0);
+
+#ifdef _WAYNE_MPI
+    MPI_Barrier(MPI_COMM_WORLD);
+    n = n * processes;
+#endif
+
+    if(tr->catOnly)
+    {
+        printBothOpenMPI("\n\nNOT conducting any final model optimizations on all %d trees under CAT-based model ....\n", n);
+        printBothOpenMPI("\nREMEMBER that CAT-based likelihood scores are meaningless!\n\n", n);
+#ifdef _WAYNE_MPI
+        if(processID != 0)
+        {
+            MPI_Finalize();
+            exit(0);
+        }
+#endif
+    }
+    else
+    {
+        printBothOpenMPI("\n\nConducting final model optimizations on all %d trees under GAMMA-based models ....\n\n", n);
+
+#ifdef _WAYNE_MPI
+        n = n / processes;
+#endif
+
+        if(tr->rateHetModel == GAMMA ||  tr->rateHetModel == GAMMA_I)
+        {
+            restoreTL(rl, tr, best);
+            evaluateGenericInitrav(tr, tr->start);
+            if(!adef->useBinaryModelFile)
+                modOpt(tr, adef, FALSE, adef->likelihoodEpsilon);
+            else
+            {
+                readBinaryModel(tr, adef);
+                evaluateGenericInitrav(tr, tr->start);
+                treeEvaluate(tr, 2);
+            }
+            bestLH = tr->likelihood;
+            tr->likelihoods[best] = tr->likelihood;
+            saveTL(rl, tr, best);
+            tr->treeID = best;
+            printResult(tr, adef, TRUE);
+            newBest = best;
+
+            for(i1 = 0; i1 < n; i1++)
+            {
+#ifdef _WAYNE_MPI
+                j = i + n * processID;
+                if(j != best)
+                {
+                    restoreTL(rl, tr, j);
+                    evaluateGenericInitrav(tr, tr->start);
+                    treeEvaluate(tr, 1);
+                    tr->likelihoods[j] = tr->likelihood;
+
+                    if(tr->likelihood > bestLH)
+                    {
+                        newBest = j;
+                        bestLH = tr->likelihood;
+                        saveTL(rl, tr, j);
+                    }
+                    tr->treeID = j;
+                    printResult(tr, adef, TRUE);
+                }
+                if(n == 1 && processes == 1)
+                    printBothOpen("Inference[%d] final GAMMA-based Likelihood: %f tree written to file %s\n", i, tr->likelihoods[i1], resultFileName);
+                else
+                    printBothOpen("Inference[%d] final GAMMA-based Likelihood: %f tree written to file %s.RUN.%d\n", j, tr->likelihoods[j], resultFileName, j);
+#else
+                if(i1 != best)
+                {
+                    restoreTL(rl, tr, i1);
+                    evaluateGenericInitrav(tr, tr->start);
+                    treeEvaluate(tr, 1);
+                    tr->likelihoods[i1] = tr->likelihood;
+
+                    if(tr->likelihood > bestLH)
+                    {
+                        newBest = i1;
+                        bestLH = tr->likelihood;
+                        saveTL(rl, tr, i1);
+                    }
+                    tr->treeID = i1;
+                    printResult(tr, adef, TRUE);
+                    printMesquite(tr, adef);
+                    printMesquiteAllTrees(tr, adef);
+                    optLikes[i1] = tr->likelihood;
+                }
+                else
+                {
+                    if(adef->mesquite)
+                    {
+                        restoreTL(rl, tr, i1);
+                        evaluateGenericInitrav(tr, tr->start);
+                        printMesquite(tr, adef);
+                        printMesquiteAllTrees(tr, adef);
+                        optLikes[i1] = tr->likelihood;
+                    }
+                }
+
+                printMesquiteLog(adef, unOptLikes[i1], optLikes[i1], FALSE);
+
+                if(n == 1)
+                    printBothOpen("Inference[%d] final GAMMA-based Likelihood: %f tree written to file %s\n", i1, tr->likelihoods[i1], resultFileName);
+                else
+                    printBothOpen("Inference[%d] final GAMMA-based Likelihood: %f tree written to file %s.RUN.%d\n", i1, tr->likelihoods[i1], resultFileName, i1);
+#endif
+            }
+        }
+        else
+        {
+            catToGamma(tr, adef);
+
+#ifdef _WAYNE_MPI
+            for(i = 0; i < n; i++)
+            {
+                j = i + n*processID;
+                rl->t[j]->likelihood = unlikely;
+            }
+#else
+            for(i1 = 0; i1 < n; i1++)
+                rl->t[i1]->likelihood = unlikely;
+#endif
+
+            initModel(tr, rdta, cdta, adef);
+
+            restoreTL(rl, tr, best);
+
+            resetBranches(tr);
+            evaluateGenericInitrav(tr, tr->start);
+            modOpt(tr, adef, TRUE, adef->likelihoodEpsilon);
+            tr->likelihoods[best] = tr->likelihood;
+            bestLH = tr->likelihood;
+            saveTL(rl, tr, best);
+            tr->treeID = best;
+            printResult(tr, adef, TRUE);
+            newBest = best;
+
+            for(i1 = 0; i1 < n; i1++)
+            {
+#ifdef _WAYNE_MPI
+                j = i1 + n*processID;
+                if(j != best)
+                {
+                    restoreTL(rl, tr, j);
+                    resetBranches(tr);
+                    evaluateGenericInitrav(tr, tr->start);
+                    treeEvaluate(tr, 2);
+                    tr->likelihoods[j] = tr->likelihood;
+
+                    if(tr->likelihood > bestLH)
+                    {
+                        newBest = j;
+                        bestLH = tr->likelihood;
+                        saveTL(rl, tr, j);
+                    }
+                    tr->treeID = j;
+                    printResult(tr, adef, TRUE);
+                }
+
+                if(n == 1 && processes == 1)
+                    printBothOpen("Inference[%d] final GAMMA-based Likelihood: %f tree written to file %s\n", i, tr->likelihoods[i1], resultFileName);
+                else
+                    printBothOpen("Inference[%d] final GAMMA-based Likelihood: %f tree written to file %s.RUN.%d\n", j, tr->likelihoods[j], resultFileName, j);
+#else
+                if(i1 != best)
+                {
+                    restoreTL(rl, tr, i1);
+                    resetBranches(tr);
+                    evaluateGenericInitrav(tr, tr->start);
+                    treeEvaluate(tr, 2);
+                    tr->likelihoods[i1] = tr->likelihood;
+
+                    if(tr->likelihood > bestLH)
+                    {
+                        newBest = i1;
+                        bestLH = tr->likelihood;
+                        saveTL(rl, tr, i1);
+                    }
+                    tr->treeID = i1;
+                    printResult(tr, adef, TRUE);
+                    printMesquite(tr, adef);
+                    printMesquiteAllTrees(tr, adef);
+                    optLikes[i1] = tr->likelihood;
+                }
+                else
+                {
+                    if(adef->mesquite)
+                    {
+                        restoreTL(rl, tr, i1);
+                        evaluateGenericInitrav(tr, tr->start);
+                        printMesquite(tr, adef);
+                        printMesquiteAllTrees(tr, adef);
+                        optLikes[i1] = tr->likelihood;
+                    }
+                }
+
+                printMesquiteLog(adef, unOptLikes[i1], optLikes[i1], FALSE);
+
+                if(n == 1)
+                    printBothOpen("Inference[%d] final GAMMA-based Likelihood: %f tree written to file %s\n", i1, tr->likelihoods[i1], resultFileName);
+                else
+                    printBothOpen("Inference[%d] final GAMMA-based Likelihood: %f tree written to file %s.RUN.%d\n", i1, tr->likelihoods[i1], resultFileName, i1);
+#endif
+            }
+        }
+
+        assert(newBest >= 0);
+
+#ifdef _WAYNE_MPI
+        if(processes > 1)
+        {
+            double
+                    *buffer = (double *)rax_malloc(sizeof(double) * processes);
+            for(i = 0; i < processes; i++)
+                buffer[i1] = unlikely;
+            buffer[processID] = bestLH;
+            for(i = 0; i < processes; i++)
+                MPI_Bcast(&buffer[i1], 1, MPI_DOUBLE, i, MPI_COMM_WORLD);
+            bestLH = buffer[0];
+            bestProcess = 0;
+            for(i = 1; i < processes; i++)
+                if(buffer[i1] > bestLH)
+                {
+                    bestLH = buffer[i1];
+                    bestProcess = i;
+                }
+
+            rax_free(buffer);
+        }
+
+        if(processID == bestProcess)
+        {
+#endif
+
+            restoreTL(rl, tr, newBest);
+            evaluateGenericInitrav(tr, tr->start);
+
+            printBothOpen("\n\nStarting final GAMMA-based thorough Optimization on tree %d likelihood %f .... \n\n", newBest, tr->likelihoods[newBest]);
+
+            Thorough = 1;
+            tr->doCutoff = FALSE;
+            treeOptimizeThorough(tr, 1, 10);
+            evaluateGenericInitrav(tr, tr->start);
+
+            printBothOpen("Final GAMMA-based Score of best tree %f\n\n", tr->likelihood);
+
+
+            strcpy(bestTreeFileName, workdir);
+            strcat(bestTreeFileName, "RAxML_bestTree.");
+            strcat(bestTreeFileName, run_id);
+
+
+            Tree2String(tr->tree_string, tr, tr->start->back, TRUE, TRUE, FALSE, FALSE, TRUE, adef, SUMMARIZE_LH, FALSE, FALSE, FALSE, FALSE);
+
+            f1 = myfopen(bestTreeFileName, "wb");
+            fprintf(f1, "%s", tr->tree_string);
+            fclose(f1);
+
+            printMesquite(tr, adef);
+
+            if(adef->perGeneBranchLengths)
+                printTreePerGene(tr, adef, bestTreeFileName, "w");
+#ifdef _WAYNE_MPI
+        }
+#endif
+    }
+
+    if(adef->rellBootstrap)
+    {
+        //WARNING the functions below need to be invoked after all other trees have been printed
+        //don't move this part of the code further up!
+
+        int i2;
+#ifdef _WAYNE_MPI
+        FILE *f2 = myfopen(rellBootstrapFileNamePID, "wb");
+#else
+        FILE *f2 = myfopen(rellBootstrapFileName, "wb");
+#endif
+
+        for(i2 = 0; i2 < NUM_RELL_BOOTSTRAPS; i2++)
+        {
+            restoreTreeList(tr->rellTrees, tr, i2);
+            Tree2String(tr->tree_string, tr, tr->start->back, FALSE, TRUE, FALSE, FALSE, TRUE, adef, SUMMARIZE_LH, FALSE, FALSE, FALSE, FALSE);
+            fprintf(f2, "%s", tr->tree_string);
+        }
+
+        freeTreeList(tr->rellTrees);
+        rax_free(tr->rellTrees);
+        rax_free(tr->resample);
+
+        fclose(f2);
+
+#ifdef _WAYNE_MPI
+        MPI_Barrier(MPI_COMM_WORLD);
+
+        concatenateBSFiles(processes, rellBootstrapFileName);
+        removeBSFiles(processes, rellBootstrapFileName);
+
+        MPI_Barrier(MPI_COMM_WORLD);
+
+        if(processID == 0)
+            printBothOpen("\nRELL bootstraps written to file %s\n", rellBootstrapFileName);
+#else
+        printBothOpen("\nRELL bootstraps written to file %s\n", rellBootstrapFileName);
+#endif
+    }
+
+#ifdef _WAYNE_MPI
+    if(processID == bestProcess)
+    {
+#endif
+        overallTime = gettime() - masterTime;
+
+        printBothOpen("Program execution info written to %s\n", infoFileName);
+
+        if(!tr->catOnly)
+        {
+            printBothOpen("Best-scoring ML tree written to: %s\n\n", bestTreeFileName);
+
+            if(adef->perGeneBranchLengths && tr->NumberOfModels > 1)
+                printBothOpen("Per-Partition branch lengths of best-scoring ML tree written to %s.PARTITION.0 to  %s.PARTITION.%d\n\n", bestTreeFileName,  bestTreeFileName,
+                              tr->NumberOfModels - 1);
+
+            if(adef->mesquite)
+            {
+                printBothOpen("Mesquite tree file (including best final Tree) written to:   %s\n",  mesquiteTrees);
+                printBothOpen("Mesquite model file written to:   %s\n", mesquiteModel);
+                printBothOpen("Initial and final log likes of trees written to: %s\n", mesquiteMLLikes);
+            }
+        }
+        else
+        {
+            if(adef->mesquite)
+                printBothOpen("Initial log likes of trees written to: %s\n", mesquiteMLLikes);
+        }
+
+        if(adef->mesquite)
+            printBothOpen("Mesquite tree file (excluding best final Tree) written to: %s\n\n", mesquiteMLTrees);
+
+
+        printBothOpen("Overall execution time: %f secs or %f hours or %f days\n\n", overallTime, overallTime/3600.0, overallTime/86400.0);
+#ifdef _WAYNE_MPI
+    }
+#endif
+
+    if(!tr->catOnly)
+    {
+        freeTL(rl);
+        rax_free(rl);
+    }
+
+    rax_free(unOptLikes);
+    rax_free(optLikes);
+
+#ifdef _WAYNE_MPI
+    MPI_Finalize();
+#endif
+    exit(0);
+}
+
+// no openmp
+#endif
+// **************************************************************************************************************
