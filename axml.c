@@ -143,81 +143,76 @@ FILE *getNumberOfTrees(tree *tr, char *fileName, analdef *adef)
 
 static void checkStdoutFlush(void)
 {
-  /* If stdout is redirected, other processes monitoring RAxML's output
-     (e.g., via tail, or a pipe) do not receive any standard output until
-     stdio gets around to flushing the file, which may be a long time.
-     To provide more continuous feeding of RAxML output to these processes,
-     we force a flush of the stdout stream once per second.
-     (Dave Swofford 16july2016)
-  */
+    /* If stdout is redirected, other processes monitoring RAxML's output
+       (e.g., via tail, or a pipe) do not receive any standard output until
+       stdio gets around to flushing the file, which may be a long time.
+       To provide more continuous feeding of RAxML output to these processes,
+       we force a flush of the stdout stream once per second.
+       (Dave Swofford 16july2016)
+    */
 
-  static clock_t
-    lastFlush;
-
-  clock_t
-    now = clock();
-
-  if(now - lastFlush > CLOCKS_PER_SEC)
-    {
-      fflush(stdout);
-      lastFlush = now;
+    static clock_t lastFlush;
+    const clock_t now = clock();
+    if (now - lastFlush > CLOCKS_PER_SEC) {
+        fflush(stdout);
+        lastFlush = now;
     }
 }
 
 static void printBoth(FILE *f, const char* format, ... )
 {
-  va_list args;
-  va_start(args, format);
-  vfprintf(f, format, args );
-  va_end(args);
+    va_list args;
+    va_start(args, format);
+    vfprintf(f, format, args );
+    va_end(args);
 
-  va_start(args, format);
-  vprintf(format, args );
-  va_end(args);
-  checkStdoutFlush();
+    va_start(args, format);
+    vprintf(format, args );
+    va_end(args);
+    checkStdoutFlush();
 }
 
 void printBothOpen(const char* format, ... )
 {
 #ifdef _QUARTET_MPI
-  if(processID == 0)
+    if(processID == 0)
 #endif
     {
-      FILE *f = myfopen(infoFileName, "ab");
+        FILE *f = myfopen(infoFileName, "ab");
 
-      va_list args;
-      va_start(args, format);
-      vfprintf(f, format, args );
-      va_end(args);
+        va_list args;
+        va_start(args, format);
+        vfprintf(f, format, args );
+        va_end(args);
 
-      va_start(args, format);
-      vprintf(format, args );
-      va_end(args);
-      checkStdoutFlush();
+        va_start(args, format);
+        vprintf(format, args );
+        va_end(args);
+        checkStdoutFlush();
 
-      fclose(f);
+        fclose(f);
     }
 }
 
 void printBothOpenMPI(const char* format, ... )
 {
 #ifdef _WAYNE_MPI
-  if(processID == 0)
+    if(processID == 0)
 #endif
     {
-      FILE *f = myfopen(infoFileName, "ab");
+        FILE *f = myfopen(infoFileName, "ab");
 
-      va_list args;
-      va_start(args, format);
-      vfprintf(f, format, args );
-      va_end(args);
+        va_list args;
+        va_start(args, format);
+        vfprintf(f, format, args );
+        va_end(args);
 
-      va_start(args, format);
-      vprintf(format, args );
-      va_end(args);
-      checkStdoutFlush();
+        va_start(args, format);
+        vprintf(format, args );
+        va_end(args);
+        checkStdoutFlush();
 
-      fclose(f);
+        fclose(f);
     }
 }
 
@@ -3763,6 +3758,7 @@ static void initAdef(analdef *adef)
   adef->fcThreshold = 99;
   adef->sampleQuartetsWithoutReplacement = FALSE;
   adef->printIdenticalSequences = FALSE;
+  adef->stop_after_seconds = 0; // do not stop on timer
 }
 
 static int modelExists(char *model, analdef *adef)
@@ -5515,32 +5511,25 @@ static void printREADME(void)
 
 static void analyzeRunId(char id[128])
 {
-  int i = 0;
+    int i = 0;
 
-  while(id[i] != '\0')
-    {
-      if(i >= 128)
-	{
-	  printf("Error: run id after \"-n\" is too long, it has %d characters please use a shorter one\n", i);
-	  assert(0);
-	}
+    while(id[i] != '\0') {
+        if(i >= 128) {
+            printf("Error: run id after \"-n\" is too long, it has %d characters please use a shorter one\n", i);
+            assert(0);
+        }
 
-      if(id[i] == '/')
-	{
-	  printf("Error character %c not allowed in run ID\n", id[i]);
-	  assert(0);
-	}
-
-
-      i++;
+        if(id[i] == '/') {
+            printf("Error character %c not allowed in run ID\n", id[i]);
+            assert(0);
+        }
+        i++;
     }
 
-  if(i == 0)
-    {
-      printf("Error: please provide a string for the run id after \"-n\" \n");
-      assert(0);
+    if (i == 0) {
+        printf("Error: please provide a string for the run id after \"-n\" \n");
+        assert(0);
     }
-
 }
 
 static void get_args(int argc, char *argv[], analdef *adef, tree *tr)
@@ -5674,6 +5663,7 @@ static void get_args(int argc, char *argv[], analdef *adef, tree *tr)
                     {"bootstop-perms",            required_argument, &flag, 1},
                     {"quartets-without-replacement", no_argument,    &flag, 1},
                     {"print-identical-sequences", no_argument,       &flag, 1},
+                    {"stop-after-seconds",        required_argument, &flag, 1},
                     {0, 0, 0, 0}
                 };
 
@@ -5689,8 +5679,7 @@ static void get_args(int argc, char *argv[], analdef *adef, tree *tr)
 
         if(flag > 0)
         {
-            switch(option_index)
-            {
+            switch(option_index) {
               case 0:
                   adef->mesquite = TRUE;
 #ifdef _WAYNE_MPI
@@ -5867,8 +5856,7 @@ static void get_args(int argc, char *argv[], analdef *adef, tree *tr)
                   int
                           perms = -1;
 
-                  if(sscanf(optarg,"%d", &perms) != 1 || (perms < 100))
-                  {
+                  if(sscanf(optarg,"%d", &perms) != 1 || (perms < 100)) {
                       printf("\nError parsing number of bootstop permutations to execute, RAxML expects a positive integer value larger or equal to 100\n\n");
                       errorExit(-1);
                   }
@@ -5882,6 +5870,12 @@ static void get_args(int argc, char *argv[], analdef *adef, tree *tr)
                   break;
               case 16:
                   adef->printIdenticalSequences = TRUE;
+                  break;
+              case 17:
+                  if (sscanf(optarg, "%d", &adef->stop_after_seconds) != 1 || (adef->stop_after_seconds < 0)) {
+                      printf("\nError parsing number of seconds to stop after, RAxML expects a positive integer or zero (to ignore time stopping)\n\n");
+                      errorExit(-1);
+                  }
                   break;
               default:
                   if(flagCheck)
