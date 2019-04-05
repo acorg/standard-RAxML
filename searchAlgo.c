@@ -28,6 +28,10 @@
  *  Bioinformatics 2006; doi: 10.1093/bioinformatics/btl446
  */
 
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+
+
 #ifndef WIN32
 #include <sys/times.h>
 #include <sys/types.h>

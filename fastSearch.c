@@ -28,6 +28,10 @@
  *  Bioinformatics 2006; doi: 10.1093/bioinformatics/btl446
  */
 
+#pragma GCC diagnostic ignored "-Wcast-qual"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+
 #ifndef WIN32
 #include <sys/times.h>
 #include <sys/types.h>
@@ -1328,6 +1332,7 @@ void fastSearch(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
 }
 
 
+#pragma GCC diagnostic ignored "-Wmissing-noreturn"
 void shSupports(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
 {
   double 

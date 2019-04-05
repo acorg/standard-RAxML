@@ -1,3 +1,7 @@
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wshadow"
+
 #include "rmqs.h"
 #include "axml.h"
 #include <assert.h>

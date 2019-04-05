@@ -1,3 +1,5 @@
+#pragma GCC diagnostic ignored "-Wvector-conversion"
+
 #include <unistd.h>
 
 #include <math.h>

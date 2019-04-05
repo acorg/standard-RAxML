@@ -28,6 +28,8 @@
  *  Bioinformatics 2006; doi: 10.1093/bioinformatics/btl446
  */
 
+#pragma GCC diagnostic ignored "-Wmissing-variable-declarations"
+
 #if (defined(_WAYNE_MPI) || defined (_QUARTET_MPI))
 int processes;
 #endif

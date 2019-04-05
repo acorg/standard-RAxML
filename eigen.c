@@ -29,8 +29,11 @@
  *  Bioinformatics 2006; doi: 10.1093/bioinformatics/btl446
  */
 
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+
 #include <math.h>
 #include <assert.h>
+#include "axml.h"
 
 
 static void mytred2(double **a, const int n, double *d, double *e)

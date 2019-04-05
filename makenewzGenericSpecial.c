@@ -29,6 +29,9 @@
  *  Bioinformatics 2006; doi: 10.1093/bioinformatics/btl446
  */
 
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wshadow"
+
 #ifndef WIN32
 #include <unistd.h>
 #endif
@@ -3866,10 +3869,10 @@ static void getVects(tree *tr, unsigned char **tipX1, unsigned char **tipX2, dou
   *x1_start_asc = (double*)NULL;
   *x2_start_asc = (double*)NULL;
   
-  *x1_start = (double*)NULL,
+  *x1_start = (double*)NULL;
   *x2_start = (double*)NULL;
   
-  *tipX1 = (unsigned char*)NULL,
+  *tipX1 = (unsigned char*)NULL;
   *tipX2 = (unsigned char*)NULL;
 
   if(isTip(pNumber, tr->mxtips) || isTip(qNumber, tr->mxtips))

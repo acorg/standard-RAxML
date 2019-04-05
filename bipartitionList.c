@@ -26,6 +26,11 @@
  *  Bioinformatics 2006; doi: 10.1093/bioinformatics/btl446
  */
 
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wcast-qual"
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wfloat-conversion"
+#pragma GCC diagnostic ignored "-Wfloat-equal"
 
 #ifndef WIN32  
 #include <sys/times.h>
@@ -1247,21 +1252,21 @@ static unsigned int countIncompatibleBipartitions(unsigned int *toInsert, hashta
 #endif
 	}
 
-      if(0)
-	{
-	  char 
-	    n[1024];
+    //   if(0)
+	// {
+	//   char 
+	//     n[1024];
 	  
-	  strcpy(n, "trace.");
-	  strcat(n, run_id);
+	//   strcpy(n, "trace.");
+	//   strcat(n, run_id);
 	  
-	  FILE 
-	    *f = fopen(n, "a");
+	//   FILE 
+	//     *f = fopen(n, "a");
 	
-	  fprintf(f, "conf bips %d candidates %d\n\n", *maxCounter, candidates);
+	//   fprintf(f, "conf bips %d candidates %d\n\n", *maxCounter, candidates);
 	
-	  fclose(f);
-	}
+	//   fclose(f);
+	// }
     }
     
   rax_free(entryVector);
@@ -1886,6 +1891,7 @@ static double testFreq(double *vect1, double *vect2, int n);
 
 
 
+#pragma GCC diagnostic ignored "-Wmissing-noreturn"
 void compareBips(tree *tr, char *bootStrapFileName, analdef *adef)
 {
   int 
@@ -2031,6 +2037,7 @@ void compareBips(tree *tr, char *bootStrapFileName, analdef *adef)
 
 /*************************************************************************************************************/
 
+#pragma GCC diagnostic ignored "-Wmissing-noreturn"
 void computeRF(tree *tr, char *bootStrapFileName, analdef *adef)
 {
   int     
@@ -2533,7 +2540,7 @@ static void rec_extractBipartitionsMulti(unsigned int** bitvectors, int* seq, in
     *bipartitions = (int*)rax_malloc((ntips - 3) * sizeof(int));
 
   hashNumberType 
-    position;
+    position = 0;
   
 
   unsigned int 
@@ -3666,6 +3673,7 @@ static double wcCriterion(int numberOfTrees, hashtable *h, int *countBetter, dou
 
 
 
+#pragma GCC diagnostic ignored "-Wmissing-noreturn"
 void computeBootStopOnly(tree *tr, char *bootStrapFileName, analdef *adef)
 {
   int numberOfTrees = 0, i;
@@ -3946,7 +3954,6 @@ boolean bootStop(tree *tr, hashtable *h, int numberOfTrees, double *pearsonAvera
 	    return TRUE;
 	  else
 	    return FALSE;
-	  break;
 	case MR_STOP:
 	case MRE_STOP:
 	case MRE_IGN_STOP:
@@ -4213,7 +4220,7 @@ static void calculateIC(tree *tr, hashtable *h, unsigned int *bitVector, unsigne
     **maximaBitVectors = (unsigned int **)rax_calloc(h->entryCount, sizeof(unsigned int *)),
     numberOfTrees = (unsigned int)trees;
 
-  *ic = 0.0,
+  *ic = 0.0;
   *icAll = 0.0;
 
   //if the support is 100% we don't need to consider any conflicting bipartitions and can save some time
@@ -4537,6 +4544,7 @@ static void printSortedBips(entry **consensusBips, const int consensusBipLen, co
 
 
 
+#pragma GCC diagnostic ignored "-Wmissing-noreturn"
 void computeConsensusOnly(tree *tr, char *treeSetFileName, analdef *adef, boolean computeIC)
 {        
   hashtable 
@@ -4560,7 +4568,7 @@ void computeConsensusOnly(tree *tr, char *treeSetFileName, analdef *adef, boolea
     **bitVectors = initBitVector(tr, &vectorLength);
 
   entry 
-    **consensusBips;
+    **consensusBips = NULL;
 
   char 
     someChar[1024],

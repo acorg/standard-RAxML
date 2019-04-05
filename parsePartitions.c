@@ -28,6 +28,11 @@
  *  Bioinformatics 2006; doi: 10.1093/bioinformatics/btl446
  */
 
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+
 
 #ifndef WIN32
 #include <sys/times.h>
@@ -60,7 +65,7 @@ extern char *protModels[NUM_PROT_MODELS];
 
 static boolean lineContainsOnlyWhiteChars(char *line)
 {
-  int i, n = strlen(line);
+  size_t i, n = strlen(line);
 
   if(n == 0)
     return TRUE;

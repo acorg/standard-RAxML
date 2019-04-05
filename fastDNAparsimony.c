@@ -29,6 +29,10 @@
  *  Bioinformatics 2006; doi: 10.1093/bioinformatics/btl446
  */
 
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wcast-align"
+#pragma GCC diagnostic ignored "-Wcast-qual"
+#pragma GCC diagnostic ignored "-Wshadow"
 
 #ifndef WIN32
 #include <sys/times.h>
@@ -2323,6 +2327,7 @@ static int infoCompare(const void *p1, const void *p2)
   return (0);
 }
 
+#pragma GCC diagnostic ignored "-Wmissing-noreturn"
 void classifyMP(tree *tr, analdef *adef)
 {    
   int  

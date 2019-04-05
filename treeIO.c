@@ -28,6 +28,11 @@
  *  Bioinformatics 2006; doi: 10.1093/bioinformatics/btl446
  */
 
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+#pragma GCC diagnostic ignored "-Wshadow"
+
 #ifndef WIN32
 #include <sys/times.h>
 #include <sys/types.h>
@@ -2035,31 +2040,31 @@ static void addMultifurcation (FILE *fp, tree *tr, nodeptr _p, analdef *adef, in
   hookupDefault(initial_p, _p, tr->numBranches);
 } 
 
-static void printMultiFurc(nodeptr p, tree *tr)
-{ 
-  if(isTip(p->number, tr->mxtips))  
-    {     
-      printf("%s", tr->nameList[p->number]);   
-    }
-  else
-    {
-      nodeptr 
-	q = p->next;     
+// static void printMultiFurc(nodeptr p, tree *tr)
+// { 
+//   if(isTip(p->number, tr->mxtips))  
+//     {     
+//       printf("%s", tr->nameList[p->number]);   
+//     }
+//   else
+//     {
+//       nodeptr 
+// 	q = p->next;     
       
-      printf("(");
+//       printf("(");
 
-      while(q != p)
-	{	 
-	  printMultiFurc(q->back, 
-			 tr);
-	  q = q->next;
-	  if(q != p)
-	    printf(",");
-	}
+//       while(q != p)
+// 	{	 
+// 	  printMultiFurc(q->back, 
+// 			 tr);
+// 	  q = q->next;
+// 	  if(q != p)
+// 	    printf(",");
+// 	}
 
-      printf(")");
-    }
-}
+//       printf(")");
+//     }
+// }
 
 void allocateMultifurcations(tree *tr, tree *smallTree)
 { 
@@ -2156,8 +2161,8 @@ static void relabelInnerNodes(nodeptr p, tree *tr, int *number, int *nodeCounter
 int readMultifurcatingTree(FILE *fp, tree *tr, analdef *adef, boolean fastParse)
 {
   nodeptr  
-    p,
-    initial_p;
+    p = NULL,
+    initial_p = NULL;
   
   int    
     innerNodeNumber,
@@ -2303,14 +2308,14 @@ int readMultifurcatingTree(FILE *fp, tree *tr, analdef *adef, boolean fastParse)
 
   //printf("Inner branches %d\n", innerBranches); 
 
-  if(0)
-    {      
-      printf("(");      
-      printMultiFurc(tr->start, tr);      
-      printf(",");
-      printMultiFurc(tr->start->back, tr);
-      printf(");\n");
-    }
+  // if(0)
+  //   {      
+  //     printf("(");      
+  //     printMultiFurc(tr->start, tr);      
+  //     printf(",");
+  //     printMultiFurc(tr->start->back, tr);
+  //     printf(");\n");
+  //   }
  
   return innerBranches;
 }

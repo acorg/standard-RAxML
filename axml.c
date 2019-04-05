@@ -28,6 +28,15 @@
  *  Bioinformatics 2006; doi: 10.1093/bioinformatics/btl446
  */
 
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wcast-qual"
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+#pragma GCC diagnostic ignored "-Wdocumentation"
+
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN // skips unwanted headers like socket etc.
 #include <windows.h>
@@ -236,7 +245,7 @@ unsigned char getUndetermined(int dataType)
 {
   assert(MIN_MODEL < dataType && dataType < MAX_MODEL);
 
-  return pLengths[dataType].undetermined;
+  return (unsigned char)pLengths[dataType].undetermined;
 }
 
 
@@ -874,7 +883,7 @@ static unsigned int KISS32(void)
 
 static boolean setupTree (tree *tr, analdef *adef)
 {
-  nodeptr  p0, p, q;
+  nodeptr  p0 = NULL, p = NULL, q = NULL;
   int
     i,
     j,  
@@ -5295,7 +5304,7 @@ static void printREADME(void)
   printf("      -M      Switch on estimation of individual per-partition branch lengths. Only has effect when used in combination with \"-q\"\n");
   printf("              Branch lengths for individual partitions will be printed to separate files\n");
   printf("              A weighted average of the branch lengths is computed by using the respective partition lengths\n");
-  printf("\n"),
+  printf("\n");
   printf("              DEFAULT: OFF\n");
   printf("\n");
   printf("      -n      Specifies the name of the output file.\n");
@@ -5575,7 +5584,7 @@ static void get_args(int argc, char *argv[], analdef *adef, tree *tr)
     flagCheck = FALSE;
 
   FILE 
-    *flagCheckFile;
+    *flagCheckFile=NULL;
 
   run_id[0] = 0;
   workdir[0] = 0;
@@ -5845,7 +5854,6 @@ static void get_args(int argc, char *argv[], analdef *adef, tree *tr)
 	    case 12:
 	       tr->useHKY85 = TRUE;
 	      break;
-	      break;	   
 	    case 13:
 #if (defined(_WAYNE_MPI) && defined(_USE_PTHREADS))
 	      adef->setThreadAffinity = TRUE;
@@ -7237,6 +7245,7 @@ static void get_args(int argc, char *argv[], analdef *adef, tree *tr)
 
 
 
+#pragma GCC diagnostic ignored "-Wmissing-noreturn"
 void errorExit(int e)
 {
 
@@ -7826,7 +7835,6 @@ void printResult(tree *tr, analdef *adef, boolean finalPrint)
     default:
       printf("FATAL ERROR call to printResult from undefined STATE %d\n", adef->mode);
       exit(-1);
-      break;
     }
 }
 
@@ -10377,6 +10385,7 @@ static int elwCompareLikelihood(const void *p1, const void *p2)
   return (0);
 }
 
+#pragma GCC diagnostic ignored "-Wmissing-noreturn"
 static void computeLHTest(tree *tr, analdef *adef, char *bootStrapFileName)
 {
   int
@@ -10587,6 +10596,7 @@ static double cumulativeTreeLength(tree *tr, analdef *adef)
   return tl;
 }
 
+#pragma GCC diagnostic ignored "-Wmissing-noreturn"
 static void computeAllLHs(tree *tr, analdef *adef, char *bootStrapFileName)
 {
   int    
@@ -10695,6 +10705,7 @@ static void computeAllLHs(tree *tr, analdef *adef, char *bootStrapFileName)
 
 
 
+#pragma GCC diagnostic ignored "-Wmissing-noreturn"
 static void computeELW(tree *tr, analdef *adef, char *bootStrapFileName)
 {
   FILE 
@@ -10963,6 +10974,7 @@ static void computeELW(tree *tr, analdef *adef, char *bootStrapFileName)
 
 
 
+#pragma GCC diagnostic ignored "-Wmissing-noreturn"
 static void computeDistances(tree *tr, analdef *adef)
 {
   int i, j, modelCounter;
@@ -11043,6 +11055,7 @@ static void computeDistances(tree *tr, analdef *adef)
 
 
 
+#pragma GCC diagnostic ignored "-Wmissing-noreturn"
 static void morphologicalCalibration(tree *tr, analdef *adef)
 {
   int 
@@ -11585,7 +11598,7 @@ static uint64_t f2(int n, int a)
   long double aDouble = a;
   long double res = (nDouble - aDouble) * (nDouble - 1 - aDouble) * (nDouble - 2 - aDouble) / 6;
   return round(res);
-};
+}
 
 /*
 Given the following nested for-loops:
@@ -11599,7 +11612,7 @@ static uint64_t f3(int n, int b)
   long double bDouble = b;
   long double res = (nDouble - bDouble) * (nDouble - 1 - bDouble) / 2;
   return round(res);
-};
+}
 
 /*
 Given the following for-loop:
@@ -11609,7 +11622,7 @@ How many iterations do we have for a given c?
 static uint64_t f4(int n, int c) 
 {
   return (n-c);
-};
+}
 
 static void preprocessQuartetPrefix(int numberOfTaxa, uint64_t *prefixSumF2, uint64_t *prefixSumF3, uint64_t *prefixSumF4)
 {
@@ -14025,39 +14038,31 @@ int main (int argc, char *argv[])
 	  
 	  getStartingTree(tr, adef);	 	  
 	  exit(0);
-	  break;
 	case GENERATE_BS:
 	  generateBS(tr, adef);
 	  exit(0);
-	  break;
 	case COMPUTE_ELW:
 	  computeELW(tr, adef, bootStrapFile);
 	  exit(0);
-	  break;
 	case COMPUTE_LHS:
 	  initModel(tr, rdta, cdta, adef);
 	  computeAllLHs(tr, adef, bootStrapFile);
 	  exit(0);
-	  break;
 	case COMPUTE_BIPARTITION_CORRELATION:
 	  compareBips(tr, bootStrapFile, adef);
 	  exit(0);
-	  break;
 	case COMPUTE_RF_DISTANCE:
 	  computeRF(tr, bootStrapFile, adef);
 	  exit(0);
-	  break;
 	case BOOTSTOP_ONLY:
 	  computeBootStopOnly(tr, bootStrapFile, adef);
 	  exit(0);
-	  break;
 	case CONSENSUS_ONLY:      
 	  if(adef->leaveDropMode)
 	    computeRogueTaxa(tr, bootStrapFile, adef);
 	  else
 	    computeConsensusOnly(tr, bootStrapFile, adef, adef->calculateIC);
 	  exit(0);
-	  break;
 	case DISTANCE_MODE:
 	  initModel(tr, rdta, cdta, adef);
 	  getStartingTree(tr, adef);
@@ -14190,7 +14195,6 @@ int main (int argc, char *argv[])
 	case PLAUSIBILITY_CHECKER:
 	  plausibilityChecker(tr, adef);
 	  exit(0);
-	  break;
 	case ROOT_TREE:
 	  rootTree(tr, adef);    
 	  break;

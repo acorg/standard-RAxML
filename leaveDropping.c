@@ -1,3 +1,8 @@
+#pragma GCC diagnostic ignored "-Wcast-qual"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wfloat-conversion"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -1532,7 +1537,7 @@ static void pruneTaxon(tree *tr, unsigned int k)
   
 
 
-
+#pragma GCC diagnostic ignored "-Wmissing-noreturn"
 void computeRogueTaxa(tree *tr,  char* treeSetFileName, analdef *adef)
 {
   char 
