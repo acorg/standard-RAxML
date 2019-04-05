@@ -11264,10 +11264,8 @@ static void extractTaxaFromTopology(tree *tr, rawdata *rdta, cruncheddata *cdta,
 
 static void myfwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
-  size_t  
-    bytes_written = fwrite(ptr, size, nmemb, stream);
-
-  assert(bytes_written = nmemb);
+  const size_t count_written = fwrite(ptr, size, nmemb, stream);
+  assert(count_written == nmemb);
 }
 
 
@@ -11371,12 +11369,8 @@ void writeBinaryModel(tree *tr, analdef *adef)
 
 static void myfread(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
-  size_t
-    bytes_read;
-  
-  bytes_read = fread(ptr, size, nmemb, stream);
-
-  assert(bytes_read == nmemb);
+    const size_t count_read = fread(ptr, size, nmemb, stream);
+    assert(count_read == nmemb);
 }
 
 
