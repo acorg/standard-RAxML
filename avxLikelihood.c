@@ -1,4 +1,6 @@
+#ifdef __clang__
 #pragma GCC diagnostic ignored "-Wvector-conversion"
+#endif
 
 #include <unistd.h>
 
