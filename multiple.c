@@ -1436,248 +1436,276 @@ static void printMesquiteLog(analdef *adef, double l1, double l2, boolean justOn
 
 #if defined(_OPENMP)
 
-#define CLONE_TYPE(TYPE) static TYPE* clone_##TYPE(TYPE* source, size_t size) \
-{ \
-    if (source == NULL) \
-        return NULL; \
-    TYPE* result = (TYPE *)rax_malloc(sizeof(*source) * size); \
-    memcpy(result, source, sizeof(*source) * size); \
-    return result; \
-}
-
-CLONE_TYPE(int)
-CLONE_TYPE(unsigned)
-CLONE_TYPE(char)
-CLONE_TYPE(boolean)
-CLONE_TYPE(double)
-CLONE_TYPE(stringHashtable)
-CLONE_TYPE(pInfo)
-
-static tree* init_clone_tree(tree* source, analdef *adef, rawdata *rdta)
+static tree* init_clone_tree(tree* source)
 {
     tree* tr = (tree *)rax_malloc(sizeof(tree));
-
-    tr->optimizeAllTrees = source->optimizeAllTrees;
-    tr->saveMemory = source->saveMemory;
-    tr->numberOfBranches = source->numberOfBranches;
-    tr->numberOfTipsForInsertion = source->numberOfTipsForInsertion;
-    tr->readPartition = clone_int(source->readPartition, tr->numberOfTipsForInsertion);
-    tr->perPartitionEPA = source->perPartitionEPA;
-    tr->inserts = clone_int(source->inserts, tr->mxtips);
-    tr->branchCounter = source->branchCounter;
-    tr->ti = clone_int(source->ti, 4 * tr->mxtips);
-    tr->numberOfTrees = source->numberOfTrees;
-    tr->nameHash = clone_stringHashtable(source->nameHash, 1);
-
-    tr->initialPartitionData = clone_pInfo(source->initialPartitionData, 1);
-    tr->extendedPartitionData = clone_pInfo(source->extendedPartitionData, tr->NumberOfModels + 1);
-    tr->initialDataVector = clone_int(source->initialDataVector, rdta->sites + 1);
-    tr->extendedDataVector = clone_int(source->extendedDataVector, rdta->sites + 1);
-
-    if (source->partitionData == source->initialPartitionData)
-        tr->partitionData = tr->initialPartitionData;
-    else if (source->partitionData == source->extendedPartitionData)
-        tr->partitionData = tr->extendedPartitionData;
-    else
-        assert(0);
-    if (source->dataVector == source->initialDataVector)
-        tr->dataVector = tr->initialDataVector;
-    else if (source->dataVector == source->extendedDataVector)
-        tr->dataVector = tr->extendedDataVector;
-    else
-        assert(0);
-
-    tr->patternPosition = clone_int(source->patternPosition, rdta->sites);
-    tr->columnPosition = clone_int(source->columnPosition, rdta->sites);
-    tr->secondaryStructureInput = clone_char(source->secondaryStructureInput, rdta->sites);
-    tr->executeModel = clone_boolean(source->executeModel, tr->NumberOfModels);
-    tr->perPartitionLH = clone_double(source->perPartitionLH, tr->NumberOfModels);
-    tr->storedPerPartitionLH = clone_double(source->storedPerPartitionLH, tr->NumberOfModels);
-    tr->td[0] = source->td[0];
-    tr->parsimonyScore = clone_unsigned(source->parsimonyScore, 2 * tr->mxtips);
-
-    tr->maxCategories = source->maxCategories;
-
-    double           *sumBuffer;
-    double           *perSiteLL;
-
-    tr->modelNumber = source->modelNumber;
-    tr->multiBranch = source->multiBranch;
-    tr->numBranches = source->numBranches;
-    tr->maxNodes = source->maxNodes;
-    tr->bootStopCriterion = source->bootStopCriterion;
-    tr->consensusType = source->consensusType;
-    tr->consensusUserThreshold = source->consensusUserThreshold;
-    tr->wcThreshold = source->wcThreshold;
-
-    double          *storedBrLens;
-
-    tr->useBrLenScaler = source->useBrLenScaler;
-    tr->useFastScaling = source->useFastScaling;
-
-    branchInfo	   *bInf;
-
-    tr->multiStateModel = source->multiStateModel;
-    tr->innerNodes = source->innerNodes;
-
-
-    double           *invariants;
-
-
-    unsigned char             **yVector;
-
-    tr->secondaryStructureModel = source->secondaryStructureModel;
-    tr->discreteRateCategories = source->discreteRateCategories;
-    tr->originalCrunchedLength = source->originalCrunchedLength;
-    tr->fullSites = source->fullSites;
-
-    int              *originalModel;
-    int              *originalDataVector;
-    int              *originalWeights;
-    int              *secondaryStructurePairs;
-    double            *partitionContributions;
-
-    tr->ascertainmentCorrectionType = source->ascertainmentCorrectionType;
-    tr->autoProteinSelectionType = source->autoProteinSelectionType;
-
-    tr->numberOfEPAEntries = source->numberOfEPAEntries;
-    tr->accumulatedEPACutoff = source->accumulatedEPACutoff;
-    tr->useAccumulatedEPACutoff = source->useAccumulatedEPACutoff;
-    tr->probThresholdEPA = source->probThresholdEPA;
-
-#ifdef _BASTIEN
-    tr->doBastienStuff = source->doBastienStuff;
-#endif
-
-    tr->lhCutoff = source->lhCutoff;
-    tr->lhAVG = source->lhAVG;
-    tr->lhDEC = source->lhDEC;
-    tr->itCount = source->itCount;
-    tr->numberOfInvariableColumns = source->numberOfInvariableColumns;
-    tr->weightOfInvariableColumns = source->weightOfInvariableColumns;
-    tr->rateHetModel = source->rateHetModel;
-    tr->startLH = source->startLH;
-    tr->endLH = source->endLH;
-    tr->likelihood = source->likelihood;
-
-    double          *likelihoods;
-    int             *invariant;
-    node           **nodep;
-    node            *start;
-
-    tr->mxtips = source->mxtips;
-
-    int              *model;
-    int              *constraintVector;
-
-    tr->numberOfSecondaryColumns = source->numberOfSecondaryColumns;
-    tr->searchConvergenceCriterion = source->searchConvergenceCriterion;
-    tr->branchLabelCounter = source->branchLabelCounter;
-    tr->ntips = source->ntips;
-    tr->binaryFile_ntips = source->binaryFile_ntips;
-    tr->nextnode = source->nextnode;
-    tr->NumberOfModels = source->NumberOfModels;
-    tr->parsimonyLength = source->parsimonyLength;
-    tr->checkPointCounter = source->checkPointCounter;
-    tr->treeID = source->treeID;
-    tr->numberOfOutgroups = source->numberOfOutgroups;
-
-    int             *outgroupNums;
-    char           **outgroups;
-
-    tr->useEpaHeuristics = source->useEpaHeuristics;
-    tr->fastEPAthreshold = source->fastEPAthreshold;
-    tr->bigCutoff = source->bigCutoff;
-
-
-    tr->rooted = source->rooted;
-    tr->grouped = source->grouped;
-    tr->constrained = source->constrained;
-    tr->doCutoff = source->doCutoff;
-    tr->catOnly = source->catOnly;
-
-    rawdata         *zzzz; // rdta;
-    cruncheddata    *cdta;
-
-    char **nameList;
-    char *tree_string;
-
-    tr->treeStringLength = source->treeStringLength;
-    tr->bestParsimony = source->bestParsimony;
-    tr->bestOfNode = source->bestOfNode;
-    tr->removeNode = source->removeNode;
-    tr->insertNode = source->insertNode;
-
-    for (size_t branch_no = 0; branch_no < NUM_BRANCHES; ++branch_no) {
-        tr->curvatOK[branch_no] = source->curvatOK[branch_no];
-        tr->coreLZ[branch_no] = source->coreLZ[branch_no];
-#ifdef _BASTIEN
-        tr->secondDerivative[branch_no] = source->secondDerivative[branch_no];
-#endif
-        tr->mxtipsVector[branch_no] = source->mxtipsVector[branch_no];
-        tr->partitionSmoothed[branch_no] = source->partitionSmoothed[branch_no];
-        tr->partitionConverged[branch_no] = source->partitionConverged[branch_no];
-        tr->zqr[branch_no] = source->zqr[branch_no];
-        tr->currentZQR[branch_no] = source->currentZQR[branch_no];
-        tr->currentLZR[branch_no] = source->currentLZR[branch_no];
-        tr->currentLZQ[branch_no] = source->currentLZQ[branch_no];
-        tr->currentLZS[branch_no] = source->currentLZS[branch_no];
-        tr->currentLZI[branch_no] = source->currentLZI[branch_no];
-        tr->lzs[branch_no] = source->lzs[branch_no];
-        tr->lzq[branch_no] = source->lzq[branch_no];
-        tr->lzr[branch_no] = source->lzr[branch_no];
-        tr->lzi[branch_no] = source->lzi[branch_no];
-    }
-
-    tr->mr_thresh = source->mr_thresh;
-    tr->wasRooted = source->wasRooted;
-    tr->leftRootNode = source->leftRootNode;
-    tr->rightRootNode = source->rightRootNode;
-    tr->rootLabel = source->rootLabel;
-    tr->useGammaMedian = source->useGammaMedian;
-    tr->noRateHet = source->noRateHet;
-    tr->corrected_IC_Score = source->corrected_IC_Score;
-    tr->useK80 = source->useK80;
-    tr->useHKY85 = source->useHKY85;
-    tr->useJC69 = source->useJC69;
-    tr->doSubtreeEPA = source->doSubtreeEPA;
-
-    if (adef->rellBootstrap) {
-        tr->resample = permutationSH(tr, NUM_RELL_BOOTSTRAPS, adef->parsimonySeed);
-        tr->rellTrees = (treeList *)rax_malloc(sizeof(treeList));
-        initTreeList(tr->rellTrees, tr, NUM_RELL_BOOTSTRAPS);
-    }
-    else {
-        tr->resample = NULL;
-        tr->rellTrees = NULL;
-    }
-
+    memcpy(tr, source, sizeof(tree));
     return tr;
 }
 
 static void free_tree(tree* tr)
 {
-    rax_free(tr->readPartition);
-    rax_free(tr->nameHash);
-    rax_free(tr->inserts);
-    rax_free(tr->ti);
-
-    rax_free(tr->initialPartitionData);
-    rax_free(tr->extendedPartitionData);
-    rax_free(tr->initialDataVector);
-    rax_free(tr->extendedDataVector);
-    rax_free(tr->patternPosition);
-    rax_free(tr->columnPosition);
-    rax_free(tr->secondaryStructureInput);
-    rax_free(tr->executeModel);
-    rax_free(tr->perPartitionLH);
-    rax_free(tr->storedPerPartitionLH);
-    rax_free(tr->parsimonyScore);
-
-    rax_free(tr->resample);
-    rax_free(tr->rellTrees);
     rax_free(tr);
 }
+
+
+// #define CLONE_TYPE(TYPE) static TYPE* clone_##TYPE(TYPE* source, size_t size) \
+// { \
+//     if (source == NULL) \
+//         return NULL; \
+//     TYPE* result = (TYPE *)rax_malloc(sizeof(*source) * size); \
+//     memcpy(result, source, sizeof(*source) * size); \
+//     return result; \
+// }
+
+// CLONE_TYPE(int)
+// CLONE_TYPE(unsigned)
+// CLONE_TYPE(char)
+// CLONE_TYPE(boolean)
+// CLONE_TYPE(double)
+// CLONE_TYPE(stringHashtable)
+// CLONE_TYPE(pInfo)
+
+// static tree* init_clone_tree(tree* source, analdef *adef, rawdata *rdta)
+// {
+//     tree* tr = (tree *)rax_malloc(sizeof(tree));
+
+//     tr->optimizeAllTrees = source->optimizeAllTrees;
+//     tr->saveMemory = source->saveMemory;
+//     tr->numberOfBranches = source->numberOfBranches;
+//     tr->numberOfTipsForInsertion = source->numberOfTipsForInsertion;
+//     tr->readPartition = clone_int(source->readPartition, tr->numberOfTipsForInsertion);
+//     tr->perPartitionEPA = source->perPartitionEPA;
+//     tr->inserts = clone_int(source->inserts, tr->mxtips);
+//     tr->branchCounter = source->branchCounter;
+//     tr->ti = clone_int(source->ti, 4 * tr->mxtips);
+//     tr->numberOfTrees = source->numberOfTrees;
+//     tr->nameHash = clone_stringHashtable(source->nameHash, 1);
+
+//     tr->initialPartitionData = clone_pInfo(source->initialPartitionData, 1);
+//     tr->extendedPartitionData = clone_pInfo(source->extendedPartitionData, tr->NumberOfModels + 1);
+//     tr->initialDataVector = clone_int(source->initialDataVector, rdta->sites + 1);
+//     tr->extendedDataVector = clone_int(source->extendedDataVector, rdta->sites + 1);
+
+//     if (source->partitionData == source->initialPartitionData)
+//         tr->partitionData = tr->initialPartitionData;
+//     else if (source->partitionData == source->extendedPartitionData)
+//         tr->partitionData = tr->extendedPartitionData;
+//     else
+//         assert(0);
+//     for(size_t model = 0, offset = 0; model < tr->NumberOfModels; model++) {
+//         tr->partitionData[model].wgt          = source->partitionData[model].wgt;
+//         tr->partitionData[model].invariant    = source->partitionData[model].invariant;
+//         tr->partitionData[model].rateCategory = source->partitionData[model].rateCategory;
+//     }
+//     if (source->dataVector == source->initialDataVector)
+//         tr->dataVector = tr->initialDataVector;
+//     else if (source->dataVector == source->extendedDataVector)
+//         tr->dataVector = tr->extendedDataVector;
+//     else
+//         assert(0);
+
+//     tr->patternPosition = clone_int(source->patternPosition, rdta->sites);
+//     tr->columnPosition = clone_int(source->columnPosition, rdta->sites);
+//     tr->secondaryStructureInput = clone_char(source->secondaryStructureInput, rdta->sites);
+//     tr->executeModel = clone_boolean(source->executeModel, tr->NumberOfModels);
+//     tr->perPartitionLH = clone_double(source->perPartitionLH, tr->NumberOfModels);
+//     tr->storedPerPartitionLH = clone_double(source->storedPerPartitionLH, tr->NumberOfModels);
+//     tr->td[0] = source->td[0];
+//     tr->parsimonyScore = clone_unsigned(source->parsimonyScore, 2 * tr->mxtips);
+
+//     tr->maxCategories = source->maxCategories;
+
+//     size_t memoryRequirements = 0;
+//     for(size_t model = 0; model < tr->NumberOfModels; model++)
+//         memoryRequirements += tr->discreteRateCategories * tr->partitionData[model].states * (tr->partitionData[model].upper - tr->partitionData[model].lower);
+
+//     tr->sumBuffer = clone_double(source->sumBuffer, memoryRequirements);
+//     for(size_t model = 0, offset = 0; model < tr->NumberOfModels; model++) {
+//         const size_t lower = tr->partitionData[model].lower,
+//         const size_t width = tr->partitionData[model].upper - lower;
+//         tr->partitionData[model].sumBuffer = &tr->sumBuffer[offset];
+//         tr->partitionData[model].perSiteLL = &tr->perSiteLL[lower];
+//         offset += tr->discreteRateCategories * tr->partitionData[model].states * width;
+//     }
+
+//     double           *perSiteLL;
+
+//     tr->modelNumber = source->modelNumber;
+//     tr->multiBranch = source->multiBranch;
+//     tr->numBranches = source->numBranches;
+//     tr->maxNodes = source->maxNodes;
+//     tr->bootStopCriterion = source->bootStopCriterion;
+//     tr->consensusType = source->consensusType;
+//     tr->consensusUserThreshold = source->consensusUserThreshold;
+//     tr->wcThreshold = source->wcThreshold;
+
+//     double          *storedBrLens;
+
+//     tr->useBrLenScaler = source->useBrLenScaler;
+//     tr->useFastScaling = source->useFastScaling;
+
+//     branchInfo	   *bInf;
+
+//     tr->multiStateModel = source->multiStateModel;
+//     tr->innerNodes = source->innerNodes;
+
+
+//     double           *invariants;
+
+
+//     unsigned char             **yVector;
+
+//     tr->secondaryStructureModel = source->secondaryStructureModel;
+//     tr->discreteRateCategories = source->discreteRateCategories;
+//     tr->originalCrunchedLength = source->originalCrunchedLength;
+//     tr->fullSites = source->fullSites;
+
+//     int              *originalModel;
+//     int              *originalDataVector;
+//     int              *originalWeights;
+//     int              *secondaryStructurePairs;
+//     double            *partitionContributions;
+
+//     tr->ascertainmentCorrectionType = source->ascertainmentCorrectionType;
+//     tr->autoProteinSelectionType = source->autoProteinSelectionType;
+
+//     tr->numberOfEPAEntries = source->numberOfEPAEntries;
+//     tr->accumulatedEPACutoff = source->accumulatedEPACutoff;
+//     tr->useAccumulatedEPACutoff = source->useAccumulatedEPACutoff;
+//     tr->probThresholdEPA = source->probThresholdEPA;
+
+// #ifdef _BASTIEN
+//     tr->doBastienStuff = source->doBastienStuff;
+// #endif
+
+//     tr->lhCutoff = source->lhCutoff;
+//     tr->lhAVG = source->lhAVG;
+//     tr->lhDEC = source->lhDEC;
+//     tr->itCount = source->itCount;
+//     tr->numberOfInvariableColumns = source->numberOfInvariableColumns;
+//     tr->weightOfInvariableColumns = source->weightOfInvariableColumns;
+//     tr->rateHetModel = source->rateHetModel;
+//     tr->startLH = source->startLH;
+//     tr->endLH = source->endLH;
+//     tr->likelihood = source->likelihood;
+
+//     double          *likelihoods;
+//     int             *invariant;
+//     node           **nodep;
+//     node            *start;
+
+//     tr->mxtips = source->mxtips;
+
+//     int              *model;
+//     int              *constraintVector;
+
+//     tr->numberOfSecondaryColumns = source->numberOfSecondaryColumns;
+//     tr->searchConvergenceCriterion = source->searchConvergenceCriterion;
+//     tr->branchLabelCounter = source->branchLabelCounter;
+//     tr->ntips = source->ntips;
+//     tr->binaryFile_ntips = source->binaryFile_ntips;
+//     tr->nextnode = source->nextnode;
+//     tr->NumberOfModels = source->NumberOfModels;
+//     tr->parsimonyLength = source->parsimonyLength;
+//     tr->checkPointCounter = source->checkPointCounter;
+//     tr->treeID = source->treeID;
+//     tr->numberOfOutgroups = source->numberOfOutgroups;
+
+//     int             *outgroupNums;
+//     char           **outgroups;
+
+//     tr->useEpaHeuristics = source->useEpaHeuristics;
+//     tr->fastEPAthreshold = source->fastEPAthreshold;
+//     tr->bigCutoff = source->bigCutoff;
+
+
+//     tr->rooted = source->rooted;
+//     tr->grouped = source->grouped;
+//     tr->constrained = source->constrained;
+//     tr->doCutoff = source->doCutoff;
+//     tr->catOnly = source->catOnly;
+
+//     rawdata         *zzzz; // rdta;
+//     cruncheddata    *cdta;
+
+//     char **nameList;
+//     char *tree_string;
+
+//     tr->treeStringLength = source->treeStringLength;
+//     tr->bestParsimony = source->bestParsimony;
+//     tr->bestOfNode = source->bestOfNode;
+//     tr->removeNode = source->removeNode;
+//     tr->insertNode = source->insertNode;
+
+//     for (size_t branch_no = 0; branch_no < NUM_BRANCHES; ++branch_no) {
+//         tr->curvatOK[branch_no] = source->curvatOK[branch_no];
+//         tr->coreLZ[branch_no] = source->coreLZ[branch_no];
+// #ifdef _BASTIEN
+//         tr->secondDerivative[branch_no] = source->secondDerivative[branch_no];
+// #endif
+//         tr->mxtipsVector[branch_no] = source->mxtipsVector[branch_no];
+//         tr->partitionSmoothed[branch_no] = source->partitionSmoothed[branch_no];
+//         tr->partitionConverged[branch_no] = source->partitionConverged[branch_no];
+//         tr->zqr[branch_no] = source->zqr[branch_no];
+//         tr->currentZQR[branch_no] = source->currentZQR[branch_no];
+//         tr->currentLZR[branch_no] = source->currentLZR[branch_no];
+//         tr->currentLZQ[branch_no] = source->currentLZQ[branch_no];
+//         tr->currentLZS[branch_no] = source->currentLZS[branch_no];
+//         tr->currentLZI[branch_no] = source->currentLZI[branch_no];
+//         tr->lzs[branch_no] = source->lzs[branch_no];
+//         tr->lzq[branch_no] = source->lzq[branch_no];
+//         tr->lzr[branch_no] = source->lzr[branch_no];
+//         tr->lzi[branch_no] = source->lzi[branch_no];
+//     }
+
+//     tr->mr_thresh = source->mr_thresh;
+//     tr->wasRooted = source->wasRooted;
+//     tr->leftRootNode = source->leftRootNode;
+//     tr->rightRootNode = source->rightRootNode;
+//     tr->rootLabel = source->rootLabel;
+//     tr->useGammaMedian = source->useGammaMedian;
+//     tr->noRateHet = source->noRateHet;
+//     tr->corrected_IC_Score = source->corrected_IC_Score;
+//     tr->useK80 = source->useK80;
+//     tr->useHKY85 = source->useHKY85;
+//     tr->useJC69 = source->useJC69;
+//     tr->doSubtreeEPA = source->doSubtreeEPA;
+
+//     if (adef->rellBootstrap) {
+//         tr->resample = permutationSH(tr, NUM_RELL_BOOTSTRAPS, adef->parsimonySeed);
+//         tr->rellTrees = (treeList *)rax_malloc(sizeof(treeList));
+//         initTreeList(tr->rellTrees, tr, NUM_RELL_BOOTSTRAPS);
+//     }
+//     else {
+//         tr->resample = NULL;
+//         tr->rellTrees = NULL;
+//     }
+
+//     return tr;
+// }
+
+// static void free_tree(tree* tr)
+// {
+//     rax_free(tr->readPartition);
+//     rax_free(tr->nameHash);
+//     rax_free(tr->inserts);
+//     rax_free(tr->ti);
+//     rax_free(tr->initialPartitionData);
+//     rax_free(tr->extendedPartitionData);
+//     rax_free(tr->initialDataVector);
+//     rax_free(tr->extendedDataVector);
+//     rax_free(tr->patternPosition);
+//     rax_free(tr->columnPosition);
+//     rax_free(tr->secondaryStructureInput);
+//     rax_free(tr->executeModel);
+//     rax_free(tr->perPartitionLH);
+//     rax_free(tr->storedPerPartitionLH);
+//     rax_free(tr->parsimonyScore);
+//     rax_free(tr->resample);
+//     rax_free(tr->rellTrees);
+//     rax_free(tr);
+// }
 
 
 void doInference(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
@@ -1701,10 +1729,11 @@ void doInference(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
 
     topolRELL_LIST *rl = (topolRELL_LIST *)rax_malloc(sizeof(topolRELL_LIST));
     initTL(rl, tr, number_of_runs);
+    getStartingTree(tr, adef);
 
     for (int thread_no = 0; thread_no < number_of_runs; ++thread_no) {
         printf(">>> %d doInference [%f]\n", thread_no, gettime() - masterTime);
-        tree* tr_for_thread = init_clone_tree(tr, adef, rdta);
+        tree* tr_for_thread = init_clone_tree(tr);
         tr_for_thread->treeID = thread_no;
         tr_for_thread->checkPointCounter = 0;
         const double loopTime = gettime();

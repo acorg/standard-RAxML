@@ -100,6 +100,7 @@ static void saveTopolRELL(tree *tr, topolRELL *tpl)
 
     saveTopolRELLRec(tr, p->back, tpl, &i, tr->rdta->numsp, tr->numBranches);
 
+    printf(">>> i=%d  2 * tr->ntips - 3 = %d  tr->ntips=%d\n", i, 2 * tr->ntips - 3, tr->ntips);
     assert(i == 2 * tr->ntips - 3);
 }
 

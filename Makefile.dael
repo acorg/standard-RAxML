@@ -4,6 +4,7 @@
 
 CC = /usr/local/opt/llvm/bin/clang
 
+# CFLAGS_OPT = -g -D_OPENMP
 CFLAGS_OPT = -O3 -mtune=intel -fopenmp
 CFLAGS_WARN = -Weverything -Wno-padded 
 CFLAGS = -D__SIM_SSE3 -mavx -D_GNU_SOURCE -fomit-frame-pointer -funroll-loops -D__AVX $(CFLAGS_OPT) $(CFLAGS_WARN)
