@@ -1819,8 +1819,6 @@ void makeParsimonyTreeFast(tree *tr, analdef *adef, boolean full)
     {
         nodeptr q;
 
-        printf("\n>>> makeParsimonyTreeFast tr->ntips=%d <%p>\n", tr->ntips, (void*)tr);
-
         tr->bestParsimony = INT_MAX;
         nextsp = ++(tr->ntips);
         p = tr->nodep[perm[nextsp]];
@@ -1851,7 +1849,6 @@ void makeParsimonyTreeFast(tree *tr, analdef *adef, boolean full)
         }
     }
 
-    printf("\n>>> makeParsimonyTreeFast 2 tr->ntips=%d <%p>\n", tr->ntips, (void*)tr);
     //printf("ADD: %d\n", tr->bestParsimony);
 
     nodeRectifier(tr);
