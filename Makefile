@@ -7,9 +7,9 @@ OPENMP = NO
 PTHREADS = NO
 AVX = YES
 
-$(info $(HOST) $(HOSTNAME))
-
 # ----------------------------------------------------------------------
+
+HOSTNAME = $(shell hostname)
 
 ifneq (,$(findstring darwin,$(MAKE_HOST)))
   CC = /usr/local/opt/llvm/bin/clang
@@ -29,7 +29,7 @@ endif
 
 CFLAGS = -O3 -mtune=intel -D__SIM_SSE3 -D_GNU_SOURCE -fomit-frame-pointer -funroll-loops $(WARNINGS)
 LIBRARIES = -lm
-PROG := raxml-$(shell echo $${HOSTNAME})
+PROG := raxml-$(HOSTNAME)
 
 ifeq ($(AVX),YES)
   CFLAGS += -D__AVX -mavx
@@ -39,6 +39,7 @@ else
 endif
 
 ifeq ($(PTHREADS),YES)
+  $(info PTHREADS)
   CFLAGS += -D_USE_PTHREADS
   LIBRARIES += -pthread 
   PROG := $(PROG)-pthreads
@@ -50,9 +51,6 @@ ifeq ($(OPENMP),YES)
   LIBRARIES += -lomp
   PROG := $(PROG)-omp
 endif
-
-$(info PROG=$(PROG))
-$(error)
 
 objs = \
   axml.o \

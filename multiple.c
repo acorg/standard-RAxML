@@ -412,7 +412,7 @@ static void rax_freeParams(int numberOfModels, pInfo *partBuffer)
 
 }
 
-static void copyParams(int numberOfModels, pInfo *dst, pInfo *src) // , tree *tr)
+static void copyParams(int numberOfModels, pInfo *dst, pInfo *src, tree *tr)
 {
     assert(src != dst);
 
@@ -644,13 +644,13 @@ void doAllInOne(tree *tr, analdef *adef)
                 {
                     if(tr->rateHetModel == CAT)
                     {
-                        copyParams(tr->NumberOfModels, catParams, tr->partitionData);
+                        copyParams(tr->NumberOfModels, catParams, tr->partitionData, tr);
                         assert(tr->cdta->endsite == tr->originalCrunchedLength);
                         catToGamma(tr, adef);
                         modOpt(tr, adef, TRUE, adef->likelihoodEpsilon);
-                        copyParams(tr->NumberOfModels, gammaParams, tr->partitionData);
+                        copyParams(tr->NumberOfModels, gammaParams, tr->partitionData, tr);
                         gammaToCat(tr);
-                        copyParams(tr->NumberOfModels, tr->partitionData, catParams);
+                        copyParams(tr->NumberOfModels, tr->partitionData, catParams, tr);
                     }
                     else
                     {
@@ -680,7 +680,7 @@ void doAllInOne(tree *tr, analdef *adef)
             const double lh = tr->likelihood;
 
             if(tr->rateHetModel == CAT) {
-                copyParams(tr->NumberOfModels, tr->partitionData, gammaParams);
+                copyParams(tr->NumberOfModels, tr->partitionData, gammaParams, tr);
 
                 catToGamma(tr, adef);
 
@@ -692,7 +692,7 @@ void doAllInOne(tree *tr, analdef *adef)
                 gammaToCat(tr);
 
 
-                copyParams(tr->NumberOfModels, tr->partitionData, catParams);
+                copyParams(tr->NumberOfModels, tr->partitionData, catParams, tr);
                 tr->likelihood = lh;
             }
             else {
@@ -1384,7 +1384,7 @@ static void printMesquiteLog(analdef *adef, double l1, double l2, boolean justOn
 
 
  __attribute__((noreturn))
-void doInference(tree *tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
+void doInference(tree* tr, analdef *adef, rawdata *rdta, cruncheddata *cdta)
 {
 #ifdef _WAYNE_MPI
     int j, bestProcess;

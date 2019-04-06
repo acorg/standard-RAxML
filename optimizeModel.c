@@ -581,12 +581,9 @@ static void evaluateChange(tree *tr, int rateNumber, double *value, double *resu
       result,
       partitionResult;
 
-    int
-      j;
-
     result = 0.0;
 
-    for(j = 0; j < tr->NumberOfModels; j++)
+    for(int j = 0; j < tr->NumberOfModels; j++)
       {
 	for(i = 0, partitionResult = 0.0; i < NumberOfThreads; i++)
 	  partitionResult += reductionBuffer[i * tr->NumberOfModels + j];
@@ -3855,7 +3852,7 @@ static void lnsrch(int n, double *xold, double fold, double *g, double *p, doubl
 #undef TOLX
 
 
-const int MAX_ITER = 3;
+static const int MAX_ITER = 3;
 
 static void dfpmin(double *p, int n, double *lower, double *upper, double gtol, int *iter, double *fret, tree *tr,  boolean *bfgsConverged);
 static double derivativeFunk(double *x, double *dfx, int n, tree *tr);

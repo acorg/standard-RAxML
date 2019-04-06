@@ -28,6 +28,7 @@
  */
 
 #pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wunused-function"
 #ifdef __clang__
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #endif
@@ -52,7 +53,7 @@
 #include <xmmintrin.h>
 #include <pmmintrin.h>
 
-const union __attribute__ ((aligned (BYTE_ALIGNMENT)))
+static const union __attribute__ ((aligned (BYTE_ALIGNMENT)))
 {
        uint64_t i[2];
        __m128d m;

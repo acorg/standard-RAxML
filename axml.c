@@ -9684,11 +9684,9 @@ static void execFunction(tree *tr, tree *localTree, int tid, int n)
     case THREAD_INSERT_CLASSIFY:
     case THREAD_INSERT_CLASSIFY_THOROUGH:
       {
-	int
-	  branchNumber;
+	int branchNumber = 0;
 
-	boolean
-	  done = FALSE;
+	boolean done = FALSE;
 
 	while(!done)
 	  {

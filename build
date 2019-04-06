@@ -7,7 +7,7 @@ else
 fi
 
 ${MAKE} cleanall
-${MAKE} PTHREADS=NO
+${MAKE} PTHREADS=NO "$@"
 ${MAKE} clean
-${MAKE} PTHREADS=YES
+${MAKE} PTHREADS=YES "$@"
 ${MAKE} clean
