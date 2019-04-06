@@ -34,6 +34,7 @@
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wcast-qual"
 #pragma GCC diagnostic ignored "-Wfloat-equal"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #ifdef __clang__
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
@@ -879,7 +880,7 @@ static unsigned int KISS32(void)
   return (x+y+w);
 }
 
-boolean setupTree(tree *tr, analdef *adef)
+static boolean setupTree(tree *tr, analdef *adef)
 {
   nodeptr  p0 = NULL, p = NULL, q = NULL;
   int
@@ -5644,7 +5645,7 @@ static void get_args(int argc, char *argv[], analdef *adef, tree *tr)
     while(1)
     {
         static struct
-                option long_options[18] =
+                option long_options[19] =
                 {
                     {"mesquite",                  no_argument,       &flag, 1},
                     {"silent",                    no_argument,       &flag, 1},

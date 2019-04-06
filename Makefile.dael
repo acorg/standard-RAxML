@@ -2,7 +2,7 @@
 # Makefile August 2006 by Alexandros Stamatakis
 # Makefile cleanup October 2006, Courtesy of Peter Cordes <peter@cordes.ca>
 
-OPENMP=NO
+OPENMP = NO
 
 CC = /usr/local/opt/llvm/bin/clang
 

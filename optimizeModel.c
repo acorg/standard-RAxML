@@ -1274,32 +1274,24 @@ static double minFreq(int index, int whichFreq, tree *tr, double absoluteMin)
 
 static double maxFreq(int index, int whichFreq, tree *tr, double absoluteMax)
 {
-  double
-    max = 0.0,
-    *w = tr->partitionData[index].freqExponents,
-    c = 0.0;
+    const double* w = tr->partitionData[index].freqExponents;
+    double c = 0.0;
+    const int states = tr->partitionData[index].states;
 
-  int
-    states = tr->partitionData[index].states,
-    i;
+    for (int i = 0; i < states; i++)
+        if (i != whichFreq)
+            c += exp(w[i]);
 
-  for(i = 0; i < states; i++)
-    if(i != whichFreq)
-      c += exp(w[i]);
+    const double max = log(1.0 - ((double)(states - 1) * FREQ_MIN)) + log(c) - log ((double)(states - 1) * FREQ_MIN);
 
-  max = log(1.0 - ((double)(states - 1) * FREQ_MIN)) + log(c) - log ((double)(states - 1) * FREQ_MIN);
+    // if(0)
+    // {
+    //     double check = exp(max) / (exp(max) + c);
+    //     printf("check max %f\n", check);
+    //     printf("max: %f \n", max);
+    // }
 
-  if(0)
-    {
-      double
-	check = exp(max) / (exp(max) + c);
-
-      printf("check max %f\n", check);
-
-      printf("max: %f \n", max);
-    }
-
-  return MIN(max, absoluteMax);
+    return MIN(max, absoluteMax);
 }
 
 //#define _DEBUG_MODEL_OPTIMIZATION

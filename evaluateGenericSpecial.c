@@ -27,6 +27,8 @@
  *  Bioinformatics 2006; doi: 10.1093/bioinformatics/btl446
  */
 
+#pragma GCC diagnostic ignored "-Wconversion"
+
 #ifndef WIN32 
 #include <unistd.h>
 #endif
