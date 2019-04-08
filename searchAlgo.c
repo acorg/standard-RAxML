@@ -1417,7 +1417,7 @@ void computeBIGRAPID(tree *tr, analdef *adef, boolean estimateModel)
                 saveBestTree(bestT, tr);
             }
         }
-        printf(">>> computeBIGRAPID while(impr) end impr:%d [%g] <%f>\n", impr, tr->likelihood, gettime() - masterTime);
+        // printf(">>> computeBIGRAPID while(impr) end impr:%d [%g] <%f>\n", impr, tr->likelihood, gettime() - masterTime);
         const double elapsed = gettime() - masterTime;
         if (impr && adef->stop_after_seconds > 0 && elapsed > adef->stop_after_seconds) {
             impr = 0;
@@ -1466,6 +1466,7 @@ cleanup_fast:
 
                 assert(bCounter == tr->mxtips - 3);
 
+                const double elapsed = gettime() - masterTime;
                 if(thoroughIterations > 0) {
                     const double rrf = convergenceCriterion(h, tr->mxtips);
                     if(rrf <= 0.01) { /* 1% cutoff */
@@ -1474,7 +1475,7 @@ cleanup_fast:
                         goto cleanup;
                     }
                     else
-                        printBothOpen("ML search convergence criterion thorough cycle %d->%d Relative Robinson-Foulds %f\n", thoroughIterations - 1, thoroughIterations, rrf);
+                        printBothOpen("ML search convergence criterion thorough cycle %d->%d Relative Robinson-Foulds %f <%f>\n", thoroughIterations - 1, thoroughIterations, rrf, elapsed);
                 }
             }
             thoroughIterations++;
@@ -1483,7 +1484,7 @@ cleanup_fast:
             rearrangementsMax += adef->stepwidth;
             rearrangementsMin += adef->stepwidth;
             if (rearrangementsMax > adef->max_rearrange) {
-                printf(">>> computeBIGRAPID cleanup_fast: while(1) break [%g] <%f>\n", tr->likelihood, gettime() - masterTime);
+                // printf(">>> computeBIGRAPID cleanup_fast: while(1) break [%g] <%f>\n", tr->likelihood, gettime() - masterTime);
                 goto cleanup;
             }
         }
